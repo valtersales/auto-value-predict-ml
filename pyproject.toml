@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "auto-value-predict-ml"
+version = "0.1.0"
+description = "Machine Learning project for predicting used car prices in Brazil"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.0.0"
+numpy = "^1.24.0"
+scikit-learn = "^1.3.0"
+matplotlib = "^3.7.0"
+seaborn = "^0.12.0"
+xgboost = "^2.0.0"
+lightgbm = "^4.0.0"
+fastapi = "^0.104.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^23.0.0"
+flake8 = "^6.0.0"
+mypy = "^1.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
