@@ -113,14 +113,60 @@ If you prefer to run locally without Docker:
    poetry shell
    ```
 
+## Dataset
+
+The project uses enriched FIPE (Fundação Instituto de Pesquisas Econômicas) data for predicting used car prices in Brazil.
+
+### Data Source
+
+The raw data was downloaded from Kaggle:
+- **Source**: [Average Car Prices Brazil](https://www.kaggle.com/datasets/vagnerbessa/average-car-prices-bazil?resource=download)
+- **Author**: Vagner Bessa
+- **Description**: Historical FIPE table data with average car prices in Brazil
+
+### Data Enrichment
+
+For educational purposes, the raw FIPE data has been enriched with synthetic but realistic values for missing features:
+
+- **Quilometragem (km)**: Calculated based on vehicle age and price, following realistic usage patterns (average 15,000 km/year)
+- **Location (state, city)**: Assigned based on Brazilian population distribution
+- **Color**: Common car colors in Brazil (White, Silver, Black, etc.)
+- **Doors**: Number of doors (2, 4, or 5)
+- **Condition**: Vehicle condition (Regular, Good, Great, Excellent) based on age and mileage
+
+The enrichment script (`src/data/enrich_fipe_data.py`) uses statistical patterns to generate realistic synthetic data that maintains the characteristics of the Brazilian used car market.
+
+### Dataset Files
+
+- **Raw data** (`data/raw/`):
+  - `fipe_cars.csv` - Historical FIPE data (599,007 records)
+  - `fipe_2022.csv` - 2022 FIPE data subset (290,275 records)
+
+- **Processed data** (`data/processed/`):
+  - `fipe_cars_enriched.csv` - Enriched historical data with all features
+  - `fipe_2022_enriched.csv` - Enriched 2022 data with all features
+
+### Data Schema
+
+The enriched datasets include the following columns:
+- `brand`, `model`, `year` - Vehicle identification
+- `price` - Target variable (price in Brazilian Reais)
+- `km` - Mileage in kilometers
+- `state`, `city` - Location
+- `fuel_type`, `transmission`, `engine_size` - Technical specifications
+- `color`, `doors`, `condition` - Additional features
+- `age_years` - Vehicle age
+
 ## Project Status
 
-🚧 **In Development** - Project structure and Docker configuration are set up. Next steps include:
-- Data collection and preprocessing
-- Feature engineering
-- Model development and training
-- API implementation
-- Model evaluation and deployment
+🚧 **In Development** - Current progress:
+- ✅ Project structure and Docker configuration
+- ✅ Data collection and enrichment
+- ⏳ Exploratory Data Analysis (EDA)
+- ⏳ Feature engineering
+- ⏳ Model development and training
+- ⏳ API implementation
+- ⏳ Model evaluation and deployment
 
 ## License
 
