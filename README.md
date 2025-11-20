@@ -36,6 +36,7 @@ auto-value-predict-ml/
 ### Data & ML
 - **Pandas** — data manipulation
 - **NumPy** — numerical operations
+- **SciPy** — statistical functions (skewness, kurtosis, Z-score)
 - **scikit-learn** — ML algorithms, preprocessing, pipelines
 - **Matplotlib / Seaborn** — data visualization (exploratory analysis)
 - **XGBoost / LightGBM** — boosted models for high accuracy
@@ -78,21 +79,31 @@ auto-value-predict-ml/
 
 Run `make help` to see all available commands:
 
+**Container Management:**
 - `make build` - Build the Docker image
 - `make up` - Start the containers
 - `make down` - Stop the containers
 - `make restart` - Restart the containers
 - `make logs` - Show container logs
 - `make shell` - Open a shell in the running container
+- `make status` - Show container status
+
+**Jupyter Notebook:**
+- `make jupyter` - Start Jupyter Lab server (accessible at http://localhost:8888)
+- `make logs-jupyter` - Show Jupyter container logs
+- `make stop-jupyter` - Stop Jupyter container
+
+**Cleanup:**
 - `make clean` - Stop and remove containers, networks
 - `make clean-containers` - Remove all stopped containers
 - `make clean-images` - Remove unused Docker images
 - `make clean-volumes` - Remove unused volumes
 - `make clean-all` - Remove containers, images, and volumes (WARNING: destructive)
+
+**Shortcuts:**
 - `make rebuild` - Clean and rebuild the Docker image
 - `make start` - Build and start the containers
 - `make stop` - Stop the containers
-- `make status` - Show container status
 
 ### Local Development
 
@@ -136,6 +147,8 @@ For educational purposes, the raw FIPE data has been enriched with synthetic but
 
 The enrichment script (`src/data/enrich_fipe_data.py`) uses statistical patterns to generate realistic synthetic data that maintains the characteristics of the Brazilian used car market.
 
+> **⚠️ Important**: These enriched features are synthetically generated for educational purposes. While they follow realistic patterns, they are not real-world observations. Model predictions should be validated against actual market data before any production use.
+
 ### Dataset Files
 
 - **Raw data** (`data/raw/`):
@@ -161,12 +174,26 @@ The enriched datasets include the following columns:
 
 🚧 **In Development** - Current progress:
 - ✅ Project structure and Docker configuration
-- ✅ Data collection and enrichment
-- ⏳ Exploratory Data Analysis (EDA)
+- ✅ Data collection and enrichment (599k+ records)
+- 🚧 Exploratory Data Analysis (EDA) - In Progress
+  - ✅ Phase 1.1: Initial Data Exploration (`01_data_overview.ipynb`)
+  - ✅ Phase 1.2: Target Variable Analysis (`02_target_analysis.ipynb`)
+  - ⏳ Phase 1.3: Feature Analysis
+  - ⏳ Phase 1.4: Relationships and Correlations
+  - ⏳ Phase 1.5: Data Quality Assessment
+- ⏳ Data preprocessing and cleaning
 - ⏳ Feature engineering
 - ⏳ Model development and training
 - ⏳ API implementation
 - ⏳ Model evaluation and deployment
+
+**Development Strategy**: MVP-first approach - building essential features for a working end-to-end pipeline, then iterating with enhancements.
+
+**Estimated Timeline**:
+- MVP (Essential features): 10-12 weeks
+- Full Implementation: 12-16 weeks
+
+See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed roadmap and task breakdown.
 
 ## License
 

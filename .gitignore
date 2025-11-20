@@ -72,3 +72,8 @@ htmlcov/
 # MLflow (if used)
 mlruns/
 
+# Documentation (personal study files)
+docs/
+
+# Scripts (utility scripts)
+scripts/

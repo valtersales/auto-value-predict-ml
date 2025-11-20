@@ -24,6 +24,18 @@ logs: ## Show container logs
 shell: ## Open a shell in the running container
 	docker-compose exec api /bin/bash
 
+jupyter: ## Start Jupyter Lab server
+	docker-compose up -d jupyter
+	@echo "Jupyter Lab is starting..."
+	@echo "Access it at: http://localhost:8888"
+	@echo "To view logs: make logs-jupyter"
+
+logs-jupyter: ## Show Jupyter container logs
+	docker-compose logs -f jupyter
+
+stop-jupyter: ## Stop Jupyter container
+	docker-compose stop jupyter
+
 clean: ## Stop and remove containers, networks
 	docker-compose down
 
