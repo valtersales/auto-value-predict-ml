@@ -31,9 +31,11 @@ auto-value-predict-ml/
 ## Technologies
 
 ### Languages & Core
+
 - **Python 3.10+**
 
 ### Data & ML
+
 - **Pandas** — data manipulation
 - **NumPy** — numerical operations
 - **SciPy** — statistical functions (skewness, kurtosis, Z-score)
@@ -42,6 +44,7 @@ auto-value-predict-ml/
 - **XGBoost / LightGBM** — boosted models for high accuracy
 
 ### API & Deployment
+
 - **FastAPI** — REST API for serving predictions
 - **Uvicorn** — application server
 - **Docker** — containerization for portability
@@ -50,22 +53,26 @@ auto-value-predict-ml/
 ## Getting Started
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - (Optional) Python 3.10+ and Poetry/pip for local development
 
 ### Using Docker (Recommended)
 
 1. **Build the Docker image:**
+
    ```bash
    make build
    ```
 
 2. **Start the containers:**
+
    ```bash
    make up
    ```
 
 3. **View logs:**
+
    ```bash
    make logs
    ```
@@ -80,6 +87,7 @@ auto-value-predict-ml/
 Run `make help` to see all available commands:
 
 **Container Management:**
+
 - `make build` - Build the Docker image
 - `make up` - Start the containers
 - `make down` - Stop the containers
@@ -89,11 +97,13 @@ Run `make help` to see all available commands:
 - `make status` - Show container status
 
 **Jupyter Notebook:**
+
 - `make jupyter` - Start Jupyter Lab server (accessible at http://localhost:8888)
 - `make logs-jupyter` - Show Jupyter container logs
 - `make stop-jupyter` - Stop Jupyter container
 
 **Cleanup:**
+
 - `make clean` - Stop and remove containers, networks
 - `make clean-containers` - Remove all stopped containers
 - `make clean-images` - Remove unused Docker images
@@ -101,6 +111,7 @@ Run `make help` to see all available commands:
 - `make clean-all` - Remove containers, images, and volumes (WARNING: destructive)
 
 **Shortcuts:**
+
 - `make rebuild` - Clean and rebuild the Docker image
 - `make start` - Build and start the containers
 - `make stop` - Stop the containers
@@ -110,11 +121,13 @@ Run `make help` to see all available commands:
 If you prefer to run locally without Docker:
 
 1. **Install dependencies using Poetry:**
+
    ```bash
    poetry install
    ```
 
    Or using pip:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -131,6 +144,7 @@ The project uses enriched FIPE (Fundação Instituto de Pesquisas Econômicas) d
 ### Data Source
 
 The raw data was downloaded from Kaggle:
+
 - **Source**: [Average Car Prices Brazil](https://www.kaggle.com/datasets/vagnerbessa/average-car-prices-bazil?resource=download)
 - **Author**: Vagner Bessa
 - **Description**: Historical FIPE table data with average car prices in Brazil
@@ -152,6 +166,7 @@ The enrichment script (`src/data/enrich_fipe_data.py`) uses statistical patterns
 ### Dataset Files
 
 - **Raw data** (`data/raw/`):
+
   - `fipe_cars.csv` - Historical FIPE data (599,007 records)
   - `fipe_2022.csv` - 2022 FIPE data subset (290,275 records)
 
@@ -162,6 +177,7 @@ The enrichment script (`src/data/enrich_fipe_data.py`) uses statistical patterns
 ### Data Schema
 
 The enriched datasets include the following columns:
+
 - `brand`, `model`, `year` - Vehicle identification
 - `price` - Target variable (price in Brazilian Reais)
 - `km` - Mileage in kilometers
@@ -173,13 +189,14 @@ The enriched datasets include the following columns:
 ## Project Status
 
 🚧 **In Development** - Current progress:
+
 - ✅ Project structure and Docker configuration
 - ✅ Data collection and enrichment (599k+ records)
 - 🚧 Exploratory Data Analysis (EDA) - In Progress
   - ✅ Phase 1.1: Initial Data Exploration (`01_data_overview.ipynb`)
   - ✅ Phase 1.2: Target Variable Analysis (`02_target_analysis.ipynb`)
   - ✅ Phase 1.3: Feature Analysis (`03_feature_analysis.ipynb`)
-  - ⏳ Phase 1.4: Relationships and Correlations
+  - ✅ Phase 1.4: Relationships and Correlations (`04_correlations.ipynb`)
   - ⏳ Phase 1.5: Data Quality Assessment
 - ⏳ Data preprocessing and cleaning
 - ⏳ Feature engineering
@@ -190,6 +207,7 @@ The enriched datasets include the following columns:
 **Development Strategy**: MVP-first approach - building essential features for a working end-to-end pipeline, then iterating with enhancements.
 
 **Estimated Timeline**:
+
 - MVP (Essential features): 10-12 weeks
 - Full Implementation: 12-16 weeks
 

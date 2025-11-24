@@ -56,16 +56,16 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ### 1.4 Relationships and Correlations
 
-- [ ] Correlation matrix (numerical features)
-- [ ] Price vs. age relationship
-- [ ] Price vs. mileage relationship
-- [ ] Price vs. brand/model analysis
-- [ ] Price vs. location (state) analysis
-- [ ] Feature interactions:
-  - [ ] Price by brand and year
-  - [ ] Price by fuel type and transmission
-  - [ ] Price by condition and age
-- [ ] Create notebook: `notebooks/04_correlations.ipynb`
+- [x] Correlation matrix (numerical features)
+- [x] Price vs. age relationship
+- [x] Price vs. mileage relationship
+- [x] Price vs. brand/model analysis
+- [x] Price vs. location (state) analysis
+- [x] Feature interactions:
+  - [x] Price by brand and year
+  - [x] Price by fuel type and transmission
+  - [x] Price by condition and age
+- [x] Create notebook: `notebooks/04_correlations.ipynb`
 
 ### 1.5 Data Quality Assessment
 
