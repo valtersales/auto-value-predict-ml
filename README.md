@@ -178,7 +178,7 @@ The enriched datasets include the following columns:
 - 🚧 Exploratory Data Analysis (EDA) - In Progress
   - ✅ Phase 1.1: Initial Data Exploration (`01_data_overview.ipynb`)
   - ✅ Phase 1.2: Target Variable Analysis (`02_target_analysis.ipynb`)
-  - ⏳ Phase 1.3: Feature Analysis
+  - ✅ Phase 1.3: Feature Analysis (`03_feature_analysis.ipynb`)
   - ⏳ Phase 1.4: Relationships and Correlations
   - ⏳ Phase 1.5: Data Quality Assessment
 - ⏳ Data preprocessing and cleaning

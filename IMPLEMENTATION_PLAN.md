@@ -41,18 +41,18 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ### 1.3 Feature Analysis
 
-- [ ] Categorical features:
-  - [ ] Brand distribution and frequency
-  - [ ] Model distribution
-  - [ ] State/city distribution
-  - [ ] Fuel type, transmission, color distributions
-  - [ ] Condition distribution
-- [ ] Numerical features:
-  - [ ] Year distribution and trends
-  - [ ] Mileage (km) distribution and relationship with age
-  - [ ] Engine size distribution
-  - [ ] Doors distribution
-- [ ] Create notebook: `notebooks/03_feature_analysis.ipynb`
+- [x] Categorical features:
+  - [x] Brand distribution and frequency
+  - [x] Model distribution
+  - [x] State/city distribution
+  - [x] Fuel type, transmission, color distributions
+  - [x] Condition distribution
+- [x] Numerical features:
+  - [x] Year distribution and trends
+  - [x] Mileage (km) distribution and relationship with age
+  - [x] Engine size distribution
+  - [x] Doors distribution
+- [x] Create notebook: `notebooks/03_feature_analysis.ipynb`
 
 ### 1.4 Relationships and Correlations
 
