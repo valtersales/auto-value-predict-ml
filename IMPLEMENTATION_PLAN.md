@@ -582,24 +582,24 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 > [!NOTE] > **MVP Strategy**: Focus on essential tasks first to build a working end-to-end pipeline (Phases 1-8 core features). Optional enhancements can be added iteratively.
 
-| Phase | Task                                   | Estimated Time | Priority  | Status         |
-| ----- | -------------------------------------- | -------------- | --------- | -------------- |
-| 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed   |
-| 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ⏳ Pending     |
-| 3     | Feature Engineering (Essential)        | 1 week         | Essential | ⏳ Pending     |
-| 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending     |
-| 4     | Baseline Models                        | 3-5 days       | Essential | ⏳ Pending     |
-| 5     | Advanced Models (RF + XGBoost)         | 1-2 weeks      | Essential | ⏳ Pending     |
-| 5.1   | Additional Models (LightGBM, CatBoost) | 1 week         | Optional  | ⏳ Pending     |
-| 6     | Model Optimization                     | 1 week         | Essential | ⏳ Pending     |
-| 6.1   | Model Ensemble                         | 3-5 days       | Optional  | ⏳ Pending     |
-| 7     | Model Persistence                      | 2-3 days       | Essential | ⏳ Pending     |
-| 8     | API Development                        | 1-2 weeks      | Essential | ⏳ Pending     |
-| 9     | Docker & Deployment                    | 1 week         | Essential | ⏳ Pending     |
-| 9.1   | CI/CD Pipeline                         | 3-5 days       | Optional  | ⏳ Pending     |
-| 10    | Documentation & Testing                | 1-2 weeks      | Essential | ⏳ Pending     |
-| 11    | Optimization & Refinement              | 1 week         | Essential | ⏳ Pending     |
-| 11.1  | Model Monitoring                       | 3-5 days       | Optional  | ⏳ Pending     |
+| Phase | Task                                   | Estimated Time | Priority  | Status       |
+| ----- | -------------------------------------- | -------------- | --------- | ------------ |
+| 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed |
+| 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ⏳ Pending   |
+| 3     | Feature Engineering (Essential)        | 1 week         | Essential | ⏳ Pending   |
+| 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending   |
+| 4     | Baseline Models                        | 3-5 days       | Essential | ⏳ Pending   |
+| 5     | Advanced Models (RF + XGBoost)         | 1-2 weeks      | Essential | ⏳ Pending   |
+| 5.1   | Additional Models (LightGBM, CatBoost) | 1 week         | Optional  | ⏳ Pending   |
+| 6     | Model Optimization                     | 1 week         | Essential | ⏳ Pending   |
+| 6.1   | Model Ensemble                         | 3-5 days       | Optional  | ⏳ Pending   |
+| 7     | Model Persistence                      | 2-3 days       | Essential | ⏳ Pending   |
+| 8     | API Development                        | 1-2 weeks      | Essential | ⏳ Pending   |
+| 9     | Docker & Deployment                    | 1 week         | Essential | ⏳ Pending   |
+| 9.1   | CI/CD Pipeline                         | 3-5 days       | Optional  | ⏳ Pending   |
+| 10    | Documentation & Testing                | 1-2 weeks      | Essential | ⏳ Pending   |
+| 11    | Optimization & Refinement              | 1 week         | Essential | ⏳ Pending   |
+| 11.1  | Model Monitoring                       | 3-5 days       | Optional  | ⏳ Pending   |
 
 **MVP Timeline (Essential Only)**: 10-12 weeks  
 **Full Implementation (Essential + Optional)**: 12-16 weeks
