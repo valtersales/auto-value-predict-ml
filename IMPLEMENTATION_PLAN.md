@@ -6,7 +6,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 **Goal**: Build an end-to-end ML pipeline that predicts the market value of used cars in Brazil, including data collection, preprocessing, feature engineering, model training, evaluation, and API deployment.
 
-**Current Status**: ✅ Data collection and enrichment completed | 🚧 EDA in progress
+**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | 🚧 Data preprocessing next
 
 **Development Approach**: MVP-first strategy - build a functional end-to-end pipeline with essential features, then iterate and optimize.
 
@@ -16,7 +16,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ---
 
-## Phase 1: Exploratory Data Analysis (EDA) ✅ In Progress
+## Phase 1: Exploratory Data Analysis (EDA) ✅ Completed
 
 ### 1.1 Initial Data Exploration
 
@@ -69,13 +69,13 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ### 1.5 Data Quality Assessment
 
-- [ ] Identify data quality issues:
-  - [ ] Inconsistent values
-  - [ ] Outliers that need treatment
-  - [ ] Missing values (if any)
-  - [ ] Data type issues
-- [ ] Document findings and recommendations
-- [ ] Create notebook: `notebooks/05_data_quality.ipynb`
+- [x] Identify data quality issues:
+  - [x] Inconsistent values
+  - [x] Outliers that need treatment
+  - [x] Missing values (if any)
+  - [x] Data type issues
+- [x] Document findings and recommendations
+- [x] Create notebook: `notebooks/05_data_quality.ipynb`
 
 **Deliverables:**
 
@@ -584,7 +584,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 | Phase | Task                                   | Estimated Time | Priority  | Status         |
 | ----- | -------------------------------------- | -------------- | --------- | -------------- |
-| 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | 🚧 In Progress |
+| 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed   |
 | 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ⏳ Pending     |
 | 3     | Feature Engineering (Essential)        | 1 week         | Essential | ⏳ Pending     |
 | 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending     |
