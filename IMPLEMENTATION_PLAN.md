@@ -6,7 +6,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 **Goal**: Build an end-to-end ML pipeline that predicts the market value of used cars in Brazil, including data collection, preprocessing, feature engineering, model training, evaluation, and API deployment.
 
-**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | 🚧 Data preprocessing next
+**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | ✅ Data preprocessing completed | 🚧 Feature engineering next
 
 **Development Approach**: MVP-first strategy - build a functional end-to-end pipeline with essential features, then iterate and optimize.
 
@@ -87,46 +87,61 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ---
 
-## Phase 2: Data Preprocessing & Cleaning
+## Phase 2: Data Preprocessing & Cleaning ✅ Completed
 
 ### 2.1 Data Cleaning Module
 
-- [ ] Create `src/data/cleaner.py`:
-  - [ ] Remove duplicates
-  - [ ] Handle outliers (price, km):
-    - [ ] IQR method for outliers
-    - [ ] Z-score method
-    - [ ] Domain knowledge-based limits
-  - [ ] Handle missing values (if any)
-  - [ ] Data type corrections
-  - [ ] Standardize text fields (brand, model, city names)
-- [ ] Unit tests: `tests/test_cleaner.py`
+- [x] Create `src/data/cleaner.py`:
+  - [x] Remove duplicates
+  - [x] Handle outliers (price, km):
+    - [x] IQR method for outliers
+    - [x] Z-score method
+    - [x] Domain knowledge-based limits
+  - [x] Handle missing values (if any)
+  - [x] Data type corrections
+  - [x] Standardize text fields (brand, model, city names)
+- [x] Unit tests: `tests/test_cleaner.py`
 
 ### 2.2 Data Validation
 
-- [ ] Create `src/data/validator.py`:
-  - [ ] Schema validation
-  - [ ] Range checks (year, price, km)
-  - [ ] Categorical value validation
-  - [ ] Business rule validation
-- [ ] Unit tests: `tests/test_validator.py`
+- [x] Create `src/data/validator.py`:
+  - [x] Schema validation
+  - [x] Range checks (year, price, km)
+  - [x] Categorical value validation
+  - [x] Business rule validation
+- [x] Unit tests: `tests/test_validator.py`
 
 ### 2.3 Data Splitting
 
-- [ ] Create `src/data/splitter.py`:
-  - [ ] Train/validation/test split (70/15/15 or 80/10/10)
-  - [ ] Stratified split by price ranges (optional)
-  - [ ] Time-based split (if using year_of_reference)
-  - [ ] Save splits to `data/processed/`
-- [ ] Unit tests: `tests/test_splitter.py`
+- [x] Create `src/data/splitter.py`:
+  - [x] Train/validation/test split (70/15/15 or 80/10/10)
+  - [x] Stratified split by price ranges (optional)
+  - [x] Time-based split (if using year_of_reference)
+  - [x] Save splits to `data/processed/`
+- [x] Unit tests: `tests/test_splitter.py`
 
 **Deliverables:**
 
-- Data cleaning pipeline
-- Validated and cleaned datasets
-- Train/validation/test splits
+- ✅ Data cleaning pipeline (`src/data/cleaner.py`)
+- ✅ Data validation module (`src/data/validator.py`)
+- ✅ Data splitting module (`src/data/splitter.py`)
+- ✅ Modular ML pipeline system (`src/pipeline/`)
+- ✅ Unit tests for all modules (`tests/test_*.py`)
+- ✅ Validated and cleaned datasets
+- ✅ Train/validation/test splits (70/15/15)
+- ✅ Pipeline execution scripts (`scripts/run_pipeline.py`, `scripts/preprocess_data.py`)
+- ✅ Makefile commands for pipeline execution
 
-**Estimated Time**: 1 week
+**Estimated Time**: 1 week  
+**Actual Time**: Completed ✅
+
+**Results:**
+
+- Processed 747,948 rows (from 889,282 original)
+- Train: 523,563 rows (70%)
+- Validation: 112,192 rows (15%)
+- Test: 112,193 rows (15%)
+- All data quality checks passed ✅
 
 ---
 
@@ -585,7 +600,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 | Phase | Task                                   | Estimated Time | Priority  | Status       |
 | ----- | -------------------------------------- | -------------- | --------- | ------------ |
 | 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed |
-| 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ⏳ Pending   |
+| 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ✅ Completed |
 | 3     | Feature Engineering (Essential)        | 1 week         | Essential | ⏳ Pending   |
 | 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending   |
 | 4     | Baseline Models                        | 3-5 days       | Essential | ⏳ Pending   |

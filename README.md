@@ -198,8 +198,15 @@ The enriched datasets include the following columns:
   - ✅ Phase 1.3: Feature Analysis (`03_feature_analysis.ipynb`)
   - ✅ Phase 1.4: Relationships and Correlations (`04_correlations.ipynb`)
   - ✅ Phase 1.5: Data Quality Assessment (`05_data_quality.ipynb`)
-- 🚧 Data preprocessing and cleaning - Next
-- ⏳ Feature engineering
+- ✅ Data preprocessing and cleaning - Completed
+  - ✅ Data cleaning pipeline (`src/data/cleaner.py`)
+  - ✅ Data validation (`src/data/validator.py`)
+  - ✅ Data splitting (`src/data/splitter.py`)
+  - ✅ Modular ML pipeline system (`src/pipeline/`)
+  - ✅ Unit tests for all modules
+  - ✅ Pipeline execution scripts and Makefile commands
+  - ✅ Processed 747,948 rows, split into train/val/test (70/15/15)
+- 🚧 Feature engineering - Next
 - ⏳ Model development and training
 - ⏳ API implementation
 - ⏳ Model evaluation and deployment
@@ -212,6 +219,49 @@ The enriched datasets include the following columns:
 - Full Implementation: 12-16 weeks
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed roadmap and task breakdown.
+
+## ML Pipeline System
+
+O projeto utiliza um sistema modular de pipeline que permite executar todas as etapas de forma orquestrada e incremental. O pipeline é expandido conforme novas fases são implementadas.
+
+### Executar Pipeline
+
+```bash
+# Executar pipeline completo (até fases implementadas)
+python scripts/run_pipeline.py
+
+# Listar etapas disponíveis
+python scripts/run_pipeline.py --list-steps
+
+# Ver status do pipeline
+python scripts/run_pipeline.py --status
+
+# Executar apenas Phase 2 (preprocessing)
+python scripts/preprocess_data.py
+
+# Executar etapas específicas
+python scripts/run_pipeline.py --start-from clean_data --stop-at split_data
+```
+
+### Estrutura do Pipeline
+
+O pipeline é composto por etapas (`PipelineStep`) que são executadas sequencialmente:
+
+1. **LoadDataStep**: Carrega datasets enriquecidos
+2. **ValidateDataStep**: Valida qualidade dos dados
+3. **CleanDataStep**: Limpa e preprocessa dados
+4. **SplitDataStep**: Divide dados em train/val/test
+5. **FeatureEngineeringStep**: Engenharia de features (Phase 3)
+6. **TrainBaselineModelsStep**: Treina modelos baseline (Phase 4)
+7. **TrainAdvancedModelsStep**: Treina modelos avançados (Phase 5)
+
+Cada etapa:
+- Valida seus pré-requisitos
+- Executa sua lógica
+- Atualiza o contexto compartilhado
+- Salva estado para permitir retomar execução
+
+Para mais detalhes, veja [src/pipeline/README.md](src/pipeline/README.md).
 
 ## License
 
