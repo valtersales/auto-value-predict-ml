@@ -226,6 +226,39 @@ O projeto utiliza um sistema modular de pipeline que permite executar todas as e
 
 ### Executar Pipeline
 
+**Via Makefile (recomendado - executa no Docker):**
+
+```bash
+# Iniciar containers Docker primeiro
+make up
+
+# Executar pipeline completo (até fases implementadas)
+make pipeline
+
+# Listar etapas disponíveis
+make pipeline-list
+
+# Ver status do pipeline
+make pipeline-status
+
+# Executar apenas Phase 2 (preprocessing)
+make pipeline-phase2
+
+# Executar etapa específica
+make pipeline-step STEP=clean_data
+
+# Executar a partir de uma etapa
+make pipeline-from STEP=split_data
+
+# Executar testes
+make test
+make test-cleaner
+make test-validator
+make test-splitter
+```
+
+**Via scripts Python diretamente:**
+
 ```bash
 # Executar pipeline completo (até fases implementadas)
 python scripts/run_pipeline.py
