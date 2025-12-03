@@ -37,15 +37,6 @@ class MLPipeline:
         """
         self.name = name
         self.steps: List[PipelineStep] = []
-        self.context: Dict[str, Any] = {
-            'config': {},
-            'artifacts': {},
-            'metadata': {
-                'pipeline_name': name,
-                'created_at': datetime.now().isoformat(),
-                'steps_executed': []
-            }
-        }
         
         if output_dir is None:
             project_root = Path(__file__).parent.parent.parent
@@ -54,6 +45,18 @@ class MLPipeline:
             self.output_dir = Path(output_dir)
         
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.context: Dict[str, Any] = {
+            'config': {},
+            'artifacts': {},
+            'output_dir': str(self.output_dir),
+            'metadata': {
+                'pipeline_name': name,
+                'created_at': datetime.now().isoformat(),
+                'steps_executed': []
+            }
+        }
+        
         self.save_state = save_state
     
     def add_step(self, step: PipelineStep) -> 'MLPipeline':

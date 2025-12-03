@@ -206,8 +206,14 @@ The enriched datasets include the following columns:
   - ✅ Unit tests for all modules
   - ✅ Pipeline execution scripts and Makefile commands
   - ✅ Processed 747,948 rows, split into train/val/test (70/15/15)
-- 🚧 Feature engineering - Next
-- ⏳ Model development and training
+- ✅ Feature engineering - Completed
+  - ✅ Feature engineering pipeline (`src/features/pipeline.py`)
+  - ✅ Feature engineering modules (`src/features/engineering.py`, `src/features/selectors.py`)
+  - ✅ Temporal features, categorical encoding, numerical transformations
+  - ✅ Location features and advanced features (optional)
+  - ✅ FeatureEngineeringStep integrated into main pipeline
+- 🚧 Baseline models - Next
+- ⏳ Advanced model development
 - ⏳ API implementation
 - ⏳ Model evaluation and deployment
 

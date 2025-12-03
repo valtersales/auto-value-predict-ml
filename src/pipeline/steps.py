@@ -18,6 +18,7 @@ try:
     from ..data.cleaner import DataCleaner
     from ..data.validator import DataValidator
     from ..data.splitter import DataSplitter
+    from ..features.pipeline import FeaturePipeline
 except (ImportError, ValueError):
     # Fallback to absolute imports (when PYTHONPATH includes src/)
     from src.pipeline.base import PipelineStep
@@ -25,6 +26,7 @@ except (ImportError, ValueError):
     from src.data.cleaner import DataCleaner
     from src.data.validator import DataValidator
     from src.data.splitter import DataSplitter
+    from src.features.pipeline import FeaturePipeline
 
 logger = logging.getLogger(__name__)
 
@@ -272,10 +274,32 @@ class SplitDataStep(PipelineStep):
 # These will be implemented as phases are completed
 
 class FeatureEngineeringStep(PipelineStep):
-    """Step 5: Feature engineering (Phase 3 - To be implemented)."""
+    """Step 5: Feature engineering (Phase 3)."""
     
-    def __init__(self):
-        super().__init__(name="feature_engineering", enabled=False)
+    def __init__(
+        self,
+        use_feature_selection: bool = False,
+        feature_selection_method: str = 'correlation',
+        target_col: str = 'price',
+        save_pipeline: bool = True,
+        random_seed: int = 42
+    ):
+        """
+        Initialize the feature engineering step.
+        
+        Args:
+            use_feature_selection: Whether to apply feature selection
+            feature_selection_method: Method for feature selection
+            target_col: Name of target column
+            save_pipeline: Whether to save the fitted pipeline
+            random_seed: Random seed for reproducibility
+        """
+        super().__init__(name="feature_engineering", enabled=True)
+        self.use_feature_selection = use_feature_selection
+        self.feature_selection_method = feature_selection_method
+        self.target_col = target_col
+        self.save_pipeline = save_pipeline
+        self.random_seed = random_seed
     
     def get_dependencies(self) -> List[str]:
         return ['split_data']
@@ -284,10 +308,91 @@ class FeatureEngineeringStep(PipelineStep):
         if 'train_data' not in context:
             logger.error("No train_data found. Run split_data step first.")
             return False
+        if self.target_col not in context['train_data'].columns:
+            logger.error(f"Target column '{self.target_col}' not found in train_data.")
+            return False
         return True
     
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        logger.warning("FeatureEngineeringStep not yet implemented. Skipping.")
+        """Execute feature engineering on train/val/test splits."""
+        train_df = context['train_data'].copy()
+        val_df = context['val_data'].copy()
+        test_df = context['test_data'].copy()
+        
+        logger.info("Starting feature engineering...")
+        logger.info(f"Train: {len(train_df):,} rows")
+        logger.info(f"Validation: {len(val_df):,} rows")
+        logger.info(f"Test: {len(test_df):,} rows")
+        
+        # Initialize feature pipeline
+        feature_pipeline = FeaturePipeline(
+            use_feature_selection=self.use_feature_selection,
+            feature_selection_method=self.feature_selection_method,
+            target_col=self.target_col,
+            random_seed=self.random_seed
+        )
+        
+        # Prepare target
+        y_train = train_df[self.target_col].copy()
+        X_train = train_df.drop(columns=[self.target_col])
+        
+        # Fit pipeline on training data
+        logger.info("Fitting feature pipeline on training data...")
+        X_train_transformed = feature_pipeline.fit_transform(X_train, y_train)
+        
+        # Transform validation and test sets
+        logger.info("Transforming validation set...")
+        y_val = val_df[self.target_col].copy()
+        X_val = val_df.drop(columns=[self.target_col])
+        X_val_transformed = feature_pipeline.transform(X_val, y_val)
+        
+        logger.info("Transforming test set...")
+        y_test = test_df[self.target_col].copy()
+        X_test = test_df.drop(columns=[self.target_col])
+        X_test_transformed = feature_pipeline.transform(X_test, y_test)
+        
+        # Store transformed data
+        context['X_train'] = X_train_transformed
+        context['y_train'] = y_train
+        context['X_val'] = X_val_transformed
+        context['y_val'] = y_val
+        context['X_test'] = X_test_transformed
+        context['y_test'] = y_test
+        
+        # Store feature pipeline
+        context['artifacts']['feature_pipeline'] = feature_pipeline
+        
+        # Save pipeline if requested
+        if self.save_pipeline:
+            # Get output_dir from context (set by pipeline) or use default
+            output_dir = context.get('output_dir')
+            if output_dir is None:
+                project_root = Path(__file__).parent.parent.parent
+                output_dir = project_root / "data" / "processed"
+            
+            output_dir = Path(output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            pipeline_path = output_dir / "feature_pipeline.joblib"
+            feature_pipeline.save(str(pipeline_path))
+            context['artifacts']['feature_pipeline_path'] = str(pipeline_path)
+            logger.info(f"Feature pipeline saved to {pipeline_path}")
+        
+        # Log feature information
+        logger.info(f"Feature engineering completed:")
+        logger.info(f"  Original features: {len(X_train.columns)}")
+        logger.info(f"  Engineered features: {len(X_train_transformed.columns)}")
+        logger.info(f"  Feature names: {list(X_train_transformed.columns)[:10]}...")
+        
+        # Get feature importance report if available
+        if self.use_feature_selection:
+            importance_report = feature_pipeline.get_feature_importance_report()
+            if importance_report is not None:
+                logger.info("\nTop 10 features by importance:")
+                top_features = importance_report.head(10)
+                for _, row in top_features.iterrows():
+                    logger.info(f"  {row['feature']}: {row['score']:.4f}")
+        
         return context
 
 

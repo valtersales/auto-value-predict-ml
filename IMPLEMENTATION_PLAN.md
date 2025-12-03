@@ -6,7 +6,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 **Goal**: Build an end-to-end ML pipeline that predicts the market value of used cars in Brazil, including data collection, preprocessing, feature engineering, model training, evaluation, and API deployment.
 
-**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | ✅ Data preprocessing completed | 🚧 Feature engineering next
+**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | ✅ Data preprocessing completed | ✅ Feature engineering completed | 🚧 Baseline models next
 
 **Development Approach**: MVP-first strategy - build a functional end-to-end pipeline with essential features, then iterate and optimize.
 
@@ -145,67 +145,75 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ---
 
-## Phase 3: Feature Engineering
+## Phase 3: Feature Engineering ✅ Completed
 
 ### 3.1 Feature Creation - Phase 1 (Essential for MVP)
 
-- [ ] Create `src/features/engineering.py`:
-  - [ ] **[ESSENTIAL] Basic temporal features**:
-    - [ ] Vehicle age (already exists, verify calculation)
-    - [ ] Age squared (non-linear relationship)
-  - [ ] **[ESSENTIAL] Categorical encoding**:
-    - [ ] One-hot encoding for low cardinality features (fuel_type, transmission, condition)
-    - [ ] Target encoding for high cardinality (brand, model)
-  - [ ] **[ESSENTIAL] Numerical transformations**:
-    - [ ] Log transformation for price (if skewed)
-    - [ ] Log transformation for km (if skewed)
-    - [ ] Standardization/normalization
-  - [ ] **[ESSENTIAL] Location features**:
-    - [ ] State encoding (one-hot or target encoding)
+- [x] Create `src/features/engineering.py`:
+  - [x] **[ESSENTIAL] Basic temporal features**:
+    - [x] Vehicle age (already exists, verify calculation)
+    - [x] Age squared (non-linear relationship)
+  - [x] **[ESSENTIAL] Categorical encoding**:
+    - [x] One-hot encoding for low cardinality features (fuel_type, transmission, condition)
+    - [x] Target encoding for high cardinality (brand, model, state)
+  - [x] **[ESSENTIAL] Numerical transformations**:
+    - [x] Log transformation for price (if skewed)
+    - [x] Log transformation for km (if skewed)
+    - [x] Standardization/normalization
+  - [x] **[ESSENTIAL] Location features**:
+    - [x] State encoding (target encoding)
+    - [x] Region encoding (Norte, Nordeste, Sul, Sudeste, Centro-Oeste)
 
-### 3.1.1 Feature Creation - Phase 2 (Optional Enhancements)
+### 3.1.1 Feature Creation - Phase 2 (Optional Enhancements) ✅ Implemented
 
-- [ ] **[OPTIONAL] Advanced features**:
-  - [ ] Depreciation rate calculation
-  - [ ] Frequency encoding (brand/model frequency)
-  - [ ] **Interaction features**:
-    - [ ] Brand × Year
-    - [ ] Fuel × Transmission
-    - [ ] Age × Condition
-    - [ ] Km per year (km / age)
-  - [ ] **Binning**:
-    - [ ] Price bins (for stratified splits)
-    - [ ] Age bins
-    - [ ] Mileage bins
-  - [ ] **Advanced location features**:
-    - [ ] Region encoding (Norte, Nordeste, Sul, Sudeste, Centro-Oeste)
-    - [ ] City size category (if applicable)
+- [x] **[OPTIONAL] Advanced features**:
+
+  - [x] Depreciation rate calculation
+  - [x] Frequency encoding (brand/model frequency)
+  - [x] **Interaction features**:
+    - [x] Brand × Year
+    - [x] Fuel × Transmission
+    - [x] Age × Condition
+    - [x] Km per year (km / age)
+  - [x] **Binning**:
+    - [x] Price bins (for stratified splits)
+    - [x] Age bins
+    - [x] Mileage bins
+  - [x] **Advanced location features**:
+    - [x] Region encoding (Norte, Nordeste, Sul, Sudeste, Centro-Oeste) - Already in Phase 1
+    - [x] City size category (if applicable)
+
+  **Note**: Advanced features are implemented in `AdvancedFeatureCreator` class and can be enabled via `use_advanced_features=True` parameter. They are disabled by default to maintain MVP focus.
 
 ### 3.2 Feature Selection
 
-- [ ] Create `src/features/selectors.py`:
-  - [ ] Correlation-based feature selection
-  - [ ] Mutual information
-  - [ ] Feature importance from baseline models
-  - [ ] Remove highly correlated features
-- [ ] Document selected features
+- [x] Create `src/features/selectors.py`:
+  - [x] Correlation-based feature selection
+  - [x] Mutual information
+  - [x] Feature importance from baseline models
+  - [x] Remove highly correlated features
+- [x] Document selected features
 
 ### 3.3 Feature Pipeline
 
-- [ ] Create `src/features/pipeline.py`:
-  - [ ] Scikit-learn Pipeline or custom pipeline
-  - [ ] Combine all transformations
-  - [ ] Fit on training, transform on validation/test
-  - [ ] Save fitted pipeline for inference
+- [x] Create `src/features/pipeline.py`:
+  - [x] Scikit-learn Pipeline or custom pipeline
+  - [x] Combine all transformations
+  - [x] Fit on training, transform on validation/test
+  - [x] Save fitted pipeline for inference
+- [x] Integrate FeatureEngineeringStep into main pipeline
 
 **Deliverables:**
 
-- Feature engineering pipeline
-- Engineered feature dataset
-- Feature importance analysis
-- Documentation of all features
+- ✅ Feature engineering pipeline (`src/features/pipeline.py`)
+- ✅ Feature engineering modules (`src/features/engineering.py`, `src/features/selectors.py`)
+- ✅ FeatureEngineeringStep integrated into main pipeline
+- ✅ Pipeline persistence (save/load functionality)
+- ⏳ Engineered feature dataset (will be created when pipeline runs)
+- ⏳ Feature importance analysis (available when feature selection is enabled)
 
-**Estimated Time**: 1-2 weeks
+**Estimated Time**: 1-2 weeks  
+**Actual Time**: Completed ✅
 
 ---
 
@@ -601,7 +609,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 | ----- | -------------------------------------- | -------------- | --------- | ------------ |
 | 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed |
 | 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ✅ Completed |
-| 3     | Feature Engineering (Essential)        | 1 week         | Essential | ⏳ Pending   |
+| 3     | Feature Engineering (Essential)        | 1 week         | Essential | ✅ Completed |
 | 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending   |
 | 4     | Baseline Models                        | 3-5 days       | Essential | ⏳ Pending   |
 | 5     | Advanced Models (RF + XGBoost)         | 1-2 weeks      | Essential | ⏳ Pending   |
