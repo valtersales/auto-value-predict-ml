@@ -87,7 +87,7 @@ class CategoricalEncoder(BaseEstimator, TransformerMixin):
             one_hot_features = ['fuel_type', 'transmission', 'condition']
         
         if target_encode_features is None:
-            target_encode_features = ['brand', 'model', 'state']
+            target_encode_features = ['brand', 'model', 'state', 'city']
         
         self.one_hot_features = one_hot_features
         self.target_encode_features = target_encode_features
@@ -689,6 +689,15 @@ class FeatureEngineeringPipeline:
         # Step 4: Transform numerical features
         if self.numerical_transformer:
             X_work = self.numerical_transformer.transform(X_work)
+        
+        # Step 5: Remove any remaining non-numeric columns (safety check)
+        # This ensures all categorical columns are properly encoded
+        numeric_cols = X_work.select_dtypes(include=[np.number]).columns.tolist()
+        non_numeric_cols = [col for col in X_work.columns if col not in numeric_cols]
+        
+        if non_numeric_cols:
+            logger.warning(f"Removing non-numeric columns that were not encoded: {non_numeric_cols}")
+            X_work = X_work[numeric_cols]
         
         logger.info(f"Feature engineering completed: {X_work.shape[1]} features")
         

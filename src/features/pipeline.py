@@ -90,6 +90,14 @@ class FeaturePipeline:
             X_transformed = self.feature_selector.fit_transform(X_transformed, y_series)
             logger.info(f"Feature selection applied: {len(self.feature_selector.selected_features)} features selected")
         
+        # Final safety check: ensure all columns are numeric
+        numeric_cols = X_transformed.select_dtypes(include=[np.number]).columns.tolist()
+        non_numeric_cols = [col for col in X_transformed.columns if col not in numeric_cols]
+        
+        if non_numeric_cols:
+            logger.warning(f"Removing non-numeric columns from training data: {non_numeric_cols}")
+            X_transformed = X_transformed[numeric_cols]
+        
         # Store feature names
         self.feature_names_ = X_transformed.columns.tolist()
         self.is_fitted = True
@@ -136,6 +144,16 @@ class FeaturePipeline:
         
         # Reorder columns to match training
         X_transformed = X_transformed[[col for col in self.feature_names_ if col in X_transformed.columns]]
+        
+        # Final safety check: ensure all columns are numeric
+        numeric_cols = X_transformed.select_dtypes(include=[np.number]).columns.tolist()
+        non_numeric_cols = [col for col in X_transformed.columns if col not in numeric_cols]
+        
+        if non_numeric_cols:
+            logger.warning(f"Removing non-numeric columns from final output: {non_numeric_cols}")
+            X_transformed = X_transformed[numeric_cols]
+            # Update feature_names_ to reflect removed columns
+            self.feature_names_ = [col for col in self.feature_names_ if col in numeric_cols]
         
         return X_transformed
     

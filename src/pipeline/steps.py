@@ -397,19 +397,125 @@ class FeatureEngineeringStep(PipelineStep):
 
 
 class TrainBaselineModelsStep(PipelineStep):
-    """Step 6: Train baseline models (Phase 4 - To be implemented)."""
+    """Step 6: Train baseline models (Phase 4)."""
     
-    def __init__(self):
-        super().__init__(name="train_baseline_models", enabled=False)
+    def __init__(
+        self,
+        random_seed: int = 42,
+        save_results: bool = True
+    ):
+        """
+        Initialize the train baseline models step.
+        
+        Args:
+            random_seed: Random seed for reproducibility
+            save_results: Whether to save model results
+        """
+        super().__init__(name="train_baseline_models", enabled=True)
+        self.random_seed = random_seed
+        self.save_results = save_results
     
     def get_dependencies(self) -> List[str]:
         return ['feature_engineering']
     
     def validate(self, context: Dict[str, Any]) -> bool:
+        """Validate that feature engineering has been completed."""
+        required_keys = ['X_train', 'y_train', 'X_val', 'y_val']
+        for key in required_keys:
+            if key not in context:
+                logger.error(f"Missing required key '{key}' in context. Run feature_engineering step first.")
+                return False
         return True
     
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        logger.warning("TrainBaselineModelsStep not yet implemented. Skipping.")
+        """Train and evaluate baseline models."""
+        from src.models import BaselineModelTrainer, ModelEvaluator, compare_models
+        
+        X_train = context['X_train']
+        y_train = context['y_train']
+        X_val = context['X_val']
+        y_val = context['y_val']
+        
+        logger.info("Training baseline models...")
+        logger.info(f"Training set: {len(X_train):,} samples, {X_train.shape[1]} features")
+        logger.info(f"Validation set: {len(X_val):,} samples")
+        
+        # Initialize trainer
+        trainer = BaselineModelTrainer(random_seed=self.random_seed)
+        
+        # Train all models
+        models = trainer.train_all_baselines(X_train, y_train, X_val, y_val)
+        
+        # Generate predictions
+        logger.info("Generating predictions on validation set...")
+        predictions = trainer.predict_all(X_val)
+        
+        # Evaluate all models
+        logger.info("Evaluating models...")
+        evaluators = {}
+        metrics = {}
+        
+        for model_name, y_pred in predictions.items():
+            evaluator = ModelEvaluator()
+            model_metrics = evaluator.evaluate(y_val, y_pred, store_residuals=True)
+            evaluators[model_name] = evaluator
+            metrics[model_name] = model_metrics
+            
+            logger.info(f"\n{model_name.upper()} Metrics:")
+            logger.info(f"  RMSE: {model_metrics['rmse']:.2f}")
+            logger.info(f"  MAE: {model_metrics['mae']:.2f}")
+            logger.info(f"  MAPE: {model_metrics['mape']:.2%}")
+            logger.info(f"  R²: {model_metrics['r2']:.4f}")
+        
+        # Create comparison DataFrame
+        comparison_df = compare_models(metrics)
+        
+        # Store results in context
+        context['baseline_models'] = models
+        context['baseline_metrics'] = metrics
+        context['baseline_evaluators'] = evaluators
+        context['baseline_comparison'] = comparison_df
+        context['baseline_trainer'] = trainer
+        
+        # Save results if requested
+        # Models and results always go to models/ directory, separate from data/processed
+        if self.save_results:
+            project_root = Path(__file__).parent.parent.parent
+            output_dir = project_root / "models" / "baseline_results"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Save comparison metrics
+            comparison_path = output_dir / "baseline_models_comparison.csv"
+            comparison_df.to_csv(comparison_path)
+            logger.info(f"Saved comparison metrics to {comparison_path}")
+            
+            # Save comparison plot
+            try:
+                plot_path = output_dir / "baseline_models_comparison.png"
+                compare_models(metrics, save_path=str(plot_path))
+            except Exception as e:
+                logger.warning(f"Could not save comparison plot: {e}")
+            
+            # Save individual model reports
+            for model_name, evaluator in evaluators.items():
+                try:
+                    report = evaluator.get_summary_report()
+                    report_path = output_dir / f"{model_name}_report.csv"
+                    report.to_csv(report_path, index=False)
+                    
+                    # Save residual plots
+                    residual_plot_path = output_dir / f"{model_name}_residuals.png"
+                    evaluator.plot_residuals(save_path=str(residual_plot_path))
+                    
+                    # Save predictions vs actuals plot
+                    pred_plot_path = output_dir / f"{model_name}_predictions_vs_actuals.png"
+                    evaluator.plot_predictions_vs_actuals(save_path=str(pred_plot_path))
+                except Exception as e:
+                    logger.warning(f"Could not save plots for {model_name}: {e}")
+            
+            context['artifacts']['baseline_results_dir'] = str(output_dir)
+        
+        logger.info("Baseline models training completed!")
         return context
 
 

@@ -124,6 +124,14 @@ pipeline-from: ## Start pipeline from a specific step (usage: make pipeline-from
 	fi
 	docker-compose exec api python scripts/run_pipeline.py --start-from $(STEP)
 
+train-baseline: ## Train baseline models
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/train_baseline_models.py
+
 # Testing commands
 # All tests run inside Docker containers
 # Make sure containers are running: make up

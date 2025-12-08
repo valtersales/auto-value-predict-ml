@@ -6,7 +6,7 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 **Goal**: Build an end-to-end ML pipeline that predicts the market value of used cars in Brazil, including data collection, preprocessing, feature engineering, model training, evaluation, and API deployment.
 
-**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | ✅ Data preprocessing completed | ✅ Feature engineering completed | 🚧 Baseline models next
+**Current Status**: ✅ Data collection and enrichment completed | ✅ EDA completed | ✅ Data preprocessing completed | ✅ Feature engineering completed | ✅ Baseline models completed | 🚧 Advanced models next
 
 **Development Approach**: MVP-first strategy - build a functional end-to-end pipeline with essential features, then iterate and optimize.
 
@@ -217,39 +217,43 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ---
 
-## Phase 4: Baseline Models
+## Phase 4: Baseline Models ✅ Completed
 
 ### 4.1 Baseline Implementations
 
-- [ ] Create `src/models/baseline.py`:
-  - [ ] **Mean/Median baseline**: Simple average/median price
-  - [ ] **Linear Regression**: Basic linear model
-  - [ ] **Ridge Regression**: L2 regularization
-  - [ ] **Lasso Regression**: L1 regularization
-  - [ ] **Decision Tree**: Simple tree model
-- [ ] Evaluate all baselines
-- [ ] Document baseline performance
+- [x] Create `src/models/baseline.py`:
+  - [x] **Mean/Median baseline**: Simple average/median price
+  - [x] **Linear Regression**: Basic linear model
+  - [x] **Ridge Regression**: L2 regularization
+  - [x] **Lasso Regression**: L1 regularization
+  - [x] **Decision Tree**: Simple tree model
+- [x] Evaluate all baselines
+- [x] Document baseline performance
 
 ### 4.2 Evaluation Metrics
 
-- [ ] Create `src/models/evaluator.py`:
-  - [ ] **RMSE** (Root Mean Squared Error)
-  - [ ] **MAE** (Mean Absolute Error)
-  - [ ] **MAPE** (Mean Absolute Percentage Error)
-  - [ ] **R² Score** (Coefficient of Determination)
-  - [ ] **Residual analysis**:
-    - [ ] Residual plots
-    - [ ] Q-Q plots
-    - [ ] Residual distribution
-- [ ] Create visualization functions for metrics
+- [x] Create `src/models/evaluator.py`:
+  - [x] **RMSE** (Root Mean Squared Error)
+  - [x] **MAE** (Mean Absolute Error)
+  - [x] **MAPE** (Mean Absolute Percentage Error)
+  - [x] **R² Score** (Coefficient of Determination)
+  - [x] **Residual analysis**:
+    - [x] Residual plots
+    - [x] Q-Q plots
+    - [x] Residual distribution
+- [x] Create visualization functions for metrics
 
 **Deliverables:**
 
-- Baseline model implementations
-- Baseline performance report
-- Evaluation metrics module
+- ✅ Baseline model implementations (`src/models/baseline.py`)
+- ✅ Baseline performance report (saved to `models/baseline_results/`)
+- ✅ Evaluation metrics module (`src/models/evaluator.py`)
+- ✅ TrainBaselineModelsStep integrated into main pipeline
+- ✅ Training script (`scripts/train_baseline_models.py`)
+- ✅ Results saved to `models/baseline_results/` (separate from `data/processed/`)
 
-**Estimated Time**: 3-5 days
+**Estimated Time**: 3-5 days  
+**Actual Time**: Completed ✅
 
 ---
 
@@ -610,8 +614,8 @@ This document outlines the complete step-by-step implementation plan for the Aut
 | 1     | Exploratory Data Analysis              | 1-2 weeks      | Essential | ✅ Completed |
 | 2     | Data Preprocessing & Cleaning          | 1 week         | Essential | ✅ Completed |
 | 3     | Feature Engineering (Essential)        | 1 week         | Essential | ✅ Completed |
-| 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ⏳ Pending   |
-| 4     | Baseline Models                        | 3-5 days       | Essential | ⏳ Pending   |
+| 3.1   | Feature Engineering (Optional)         | 1 week         | Optional  | ✅ Completed |
+| 4     | Baseline Models                        | 3-5 days       | Essential | ✅ Completed |
 | 5     | Advanced Models (RF + XGBoost)         | 1-2 weeks      | Essential | ⏳ Pending   |
 | 5.1   | Additional Models (LightGBM, CatBoost) | 1 week         | Optional  | ⏳ Pending   |
 | 6     | Model Optimization                     | 1 week         | Essential | ⏳ Pending   |
@@ -635,17 +639,17 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 - [x] Raw datasets collected
 - [x] Data enrichment completed
-- [ ] EDA notebooks completed
-- [ ] Data cleaning pipeline
-- [ ] Feature engineering pipeline
+- [x] EDA notebooks completed
+- [x] Data cleaning pipeline
+- [x] Feature engineering pipeline
 
 ### Models
 
-- [ ] Baseline models implemented
+- [x] Baseline models implemented
 - [ ] Advanced models trained
 - [ ] Best model selected and optimized
-- [ ] Model artifacts saved
-- [ ] Model performance report
+- [x] Model artifacts saved (baseline results in `models/baseline_results/`)
+- [x] Model performance report (baseline models)
 
 ### API & Deployment
 
@@ -707,6 +711,6 @@ This document outlines the complete step-by-step implementation plan for the Aut
 
 ---
 
-**Last Updated**: 2024-11-19  
-**Current Phase**: Phase 1 - Exploratory Data Analysis  
+**Last Updated**: 2024-12-08  
+**Current Phase**: Phase 4 - Baseline Models ✅ Completed | Phase 5 - Advanced Models 🚧 Next  
 **Strategy**: MVP-first approach with essential features, then iterate with optional enhancements

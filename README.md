@@ -212,8 +212,14 @@ The enriched datasets include the following columns:
   - ✅ Temporal features, categorical encoding, numerical transformations
   - ✅ Location features and advanced features (optional)
   - ✅ FeatureEngineeringStep integrated into main pipeline
-- 🚧 Baseline models - Next
-- ⏳ Advanced model development
+- ✅ Baseline models - Completed
+  - ✅ Baseline model implementations (`src/models/baseline.py`)
+  - ✅ Evaluation metrics module (`src/models/evaluator.py`)
+  - ✅ Mean/Median, Linear Regression, Ridge, Lasso, Decision Tree models
+  - ✅ TrainBaselineModelsStep integrated into main pipeline
+  - ✅ Training script (`scripts/train_baseline_models.py`)
+  - ✅ Results saved to `models/baseline_results/` (metrics, reports, plots)
+- 🚧 Advanced model development - Next
 - ⏳ API implementation
 - ⏳ Model evaluation and deployment
 
@@ -256,6 +262,9 @@ make pipeline-step STEP=clean_data
 # Executar a partir de uma etapa
 make pipeline-from STEP=split_data
 
+# Treinar modelos baseline (standalone)
+make train-baseline
+
 # Executar testes
 make test
 make test-cleaner
@@ -280,6 +289,9 @@ python scripts/preprocess_data.py
 
 # Executar etapas específicas
 python scripts/run_pipeline.py --start-from clean_data --stop-at split_data
+
+# Treinar modelos baseline (standalone)
+python scripts/train_baseline_models.py
 ```
 
 ### Estrutura do Pipeline
