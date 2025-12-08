@@ -151,9 +151,10 @@ class FeaturePipeline:
         
         if non_numeric_cols:
             logger.warning(f"Removing non-numeric columns from final output: {non_numeric_cols}")
-            X_transformed = X_transformed[numeric_cols]
-            # Update feature_names_ to reflect removed columns
-            self.feature_names_ = [col for col in self.feature_names_ if col in numeric_cols]
+            # Only keep columns that are both numeric AND in feature_names_
+            # This maintains immutability: feature_names_ is never modified after fit()
+            valid_numeric_cols = [col for col in self.feature_names_ if col in numeric_cols]
+            X_transformed = X_transformed[valid_numeric_cols]
         
         return X_transformed
     
@@ -216,4 +217,3 @@ class FeaturePipeline:
         if self.feature_selector:
             return self.feature_selector.get_feature_importance_report()
         return None
-
