@@ -15,11 +15,14 @@ from .evaluator import (
     compare_models
 )
 
+from .trainer import AdvancedModelTrainer
+
 __all__ = [
     'MeanBaseline',
     'MedianBaseline',
     'BaselineModelTrainer',
     'ModelEvaluator',
-    'compare_models'
+    'compare_models',
+    'AdvancedModelTrainer'
 ]
 

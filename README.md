@@ -219,7 +219,15 @@ The enriched datasets include the following columns:
   - ✅ TrainBaselineModelsStep integrated into main pipeline
   - ✅ Training script (`scripts/train_baseline_models.py`)
   - ✅ Results saved to `models/baseline_results/` (metrics, reports, plots)
-- 🚧 Advanced model development - Next
+- ✅ Advanced model development - Completed
+  - ✅ Advanced model trainer (`src/models/trainer.py`)
+  - ✅ Random Forest with RandomizedSearchCV (2-fold CV, optimized for memory)
+  - ✅ XGBoost with validation-based hyperparameter search
+  - ✅ LightGBM with validation-based hyperparameter search
+  - ✅ TrainAdvancedModelsStep integrated into main pipeline
+  - ✅ Training script (`scripts/train_advanced_models.py`)
+  - ✅ Results saved to `models/advanced_results/` (metrics, reports, plots, models)
+- 🚧 Model optimization and fine-tuning - Next
 - ⏳ API implementation
 - ⏳ Model evaluation and deployment
 
@@ -265,6 +273,9 @@ make pipeline-from STEP=split_data
 # Treinar modelos baseline (standalone)
 make train-baseline
 
+# Treinar modelos avançados (standalone)
+make train-advanced
+
 # Executar testes
 make test
 make test-cleaner
@@ -292,6 +303,9 @@ python scripts/run_pipeline.py --start-from clean_data --stop-at split_data
 
 # Treinar modelos baseline (standalone)
 python scripts/train_baseline_models.py
+
+# Treinar modelos avançados (standalone)
+python scripts/train_advanced_models.py
 ```
 
 ### Estrutura do Pipeline
@@ -304,7 +318,7 @@ O pipeline é composto por etapas (`PipelineStep`) que são executadas sequencia
 4. **SplitDataStep**: Divide dados em train/val/test
 5. **FeatureEngineeringStep**: Engenharia de features (Phase 3)
 6. **TrainBaselineModelsStep**: Treina modelos baseline (Phase 4)
-7. **TrainAdvancedModelsStep**: Treina modelos avançados (Phase 5)
+7. **TrainAdvancedModelsStep**: Treina modelos avançados (Phase 5) ✅
 
 Cada etapa:
 - Valida seus pré-requisitos

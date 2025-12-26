@@ -520,18 +520,117 @@ class TrainBaselineModelsStep(PipelineStep):
 
 
 class TrainAdvancedModelsStep(PipelineStep):
-    """Step 7: Train advanced models (Phase 5 - To be implemented)."""
+    """Step 7: Train advanced models (Phase 5)."""
     
-    def __init__(self):
-        super().__init__(name="train_advanced_models", enabled=False)
+    def __init__(
+        self,
+        random_seed: int = 42,
+        save_results: bool = True,
+        save_models: bool = True,
+        include_lightgbm: bool = True
+    ):
+        super().__init__(name="train_advanced_models", enabled=True)
+        self.random_seed = random_seed
+        self.save_results = save_results
+        self.save_models = save_models
+        self.include_lightgbm = include_lightgbm
     
     def get_dependencies(self) -> List[str]:
-        return ['train_baseline_models']
+        # Requires engineered features; baseline step is optional for this phase
+        return ['feature_engineering']
     
     def validate(self, context: Dict[str, Any]) -> bool:
+        required_keys = ['X_train', 'y_train', 'X_val', 'y_val']
+        for key in required_keys:
+            if key not in context:
+                logger.error(f"Missing required key '{key}' in context. Run feature_engineering step first.")
+                return False
         return True
     
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        logger.warning("TrainAdvancedModelsStep not yet implemented. Skipping.")
+        from pathlib import Path
+        import joblib
+        from src.models import AdvancedModelTrainer, ModelEvaluator, compare_models
+        
+        X_train = context['X_train']
+        y_train = context['y_train']
+        X_val = context['X_val']
+        y_val = context['y_val']
+        
+        logger.info("Training advanced models (RF, XGBoost, LightGBM)...")
+        trainer = AdvancedModelTrainer(
+            random_seed=self.random_seed,
+            use_lightgbm=self.include_lightgbm
+        )
+        
+        models = trainer.train_all(
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            y_val=y_val,
+            include_lightgbm=self.include_lightgbm
+        )
+        
+        # Evaluate on validation set
+        metrics = {}
+        evaluators = {}
+        for model_name, model in models.items():
+            evaluator = ModelEvaluator()
+            preds = model.predict(X_val)
+            model_metrics = evaluator.evaluate(y_val, preds, store_residuals=True)
+            metrics[model_name] = model_metrics
+            evaluators[model_name] = evaluator
+            
+            logger.info(f"\n{model_name.upper()} Metrics:")
+            logger.info(f"  RMSE: {model_metrics['rmse']:.2f}")
+            logger.info(f"  MAE: {model_metrics['mae']:.2f}")
+            logger.info(f"  MAPE: {model_metrics['mape']:.2%}")
+            logger.info(f"  R²: {model_metrics['r2']:.4f}")
+        
+        comparison_df = compare_models(metrics)
+        
+        # Persist artifacts
+        if self.save_results or self.save_models:
+            project_root = Path(__file__).parent.parent.parent
+            output_dir = project_root / "models" / "advanced_results"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            if self.save_results:
+                comparison_path = output_dir / "advanced_models_comparison.csv"
+                comparison_df.to_csv(comparison_path)
+                logger.info(f"Saved comparison metrics to {comparison_path}")
+                
+                # Save individual reports and plots
+                for model_name, evaluator in evaluators.items():
+                    try:
+                        report = evaluator.get_summary_report()
+                        report_path = output_dir / f"{model_name}_report.csv"
+                        report.to_csv(report_path, index=False)
+                        
+                        residual_plot_path = output_dir / f"{model_name}_residuals.png"
+                        evaluator.plot_residuals(save_path=str(residual_plot_path))
+                        
+                        pred_plot_path = output_dir / f"{model_name}_predictions_vs_actuals.png"
+                        evaluator.plot_predictions_vs_actuals(save_path=str(pred_plot_path))
+                    except Exception as e:
+                        logger.warning(f"Could not save plots for {model_name}: {e}")
+            
+            if self.save_models:
+                for model_name, model in models.items():
+                    model_path = output_dir / f"{model_name}.joblib"
+                    try:
+                        joblib.dump(model, model_path)
+                        logger.info(f"Saved model '{model_name}' to {model_path}")
+                    except Exception as e:
+                        logger.warning(f"Could not save model {model_name}: {e}")
+        
+        # Store in context
+        context['advanced_models'] = models
+        context['advanced_metrics'] = metrics
+        context['advanced_evaluators'] = evaluators
+        context['advanced_comparison'] = comparison_df
+        context['advanced_trainer'] = trainer
+        
+        logger.info("Advanced models training completed!")
         return context
 

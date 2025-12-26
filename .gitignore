@@ -80,4 +80,5 @@ scripts/*
 !scripts/run_pipeline.py
 !scripts/preprocess_data.py
 !scripts/train_baseline_models.py
+!scripts/train_advanced_models.py
 !scripts/convert_md_to_pdf.py

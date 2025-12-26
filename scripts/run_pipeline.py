@@ -92,11 +92,16 @@ def create_pipeline() -> MLPipeline:
         random_seed=42
     ))
     
-    # Phase 4: Baseline Models (placeholder - to be implemented)
+    # Phase 4: Baseline Models
     pipeline.add_step(TrainBaselineModelsStep())
     
-    # Phase 5: Advanced Models (placeholder - to be implemented)
-    pipeline.add_step(TrainAdvancedModelsStep())
+    # Phase 5: Advanced Models
+    pipeline.add_step(TrainAdvancedModelsStep(
+        random_seed=42,
+        save_results=True,
+        save_models=True,
+        include_lightgbm=True
+    ))
     
     return pipeline
 

@@ -132,6 +132,14 @@ train-baseline: ## Train baseline models
 	fi
 	docker-compose exec api python scripts/train_baseline_models.py
 
+train-advanced: ## Train advanced models (Random Forest, XGBoost, LightGBM)
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/train_advanced_models.py
+
 # Testing commands
 # All tests run inside Docker containers
 # Make sure containers are running: make up
