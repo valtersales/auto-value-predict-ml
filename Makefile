@@ -140,6 +140,46 @@ train-advanced: ## Train advanced models (Random Forest, XGBoost, LightGBM)
 	fi
 	docker-compose exec api python scripts/train_advanced_models.py
 
+evaluate-test: ## Evaluate trained models on test set
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/evaluate_test_set.py
+
+optimize-lightgbm: ## Optimize LightGBM hyperparameters
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/optimize_lightgbm.py
+
+analyze-segments: ## Analyze model performance by segments and errors
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/analyze_segments_and_errors.py
+
+save-model: ## Save model with versioning and metadata
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/save_model_with_versioning.py
+
+load-model: ## Load and validate a saved model
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python scripts/load_and_validate_model.py
+
 # Testing commands
 # All tests run inside Docker containers
 # Make sure containers are running: make up

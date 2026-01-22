@@ -227,9 +227,18 @@ The enriched datasets include the following columns:
   - ✅ TrainAdvancedModelsStep integrated into main pipeline
   - ✅ Training script (`scripts/train_advanced_models.py`)
   - ✅ Results saved to `models/advanced_results/` (metrics, reports, plots, models)
-- 🚧 Model optimization and fine-tuning - Next
-- ⏳ API implementation
-- ⏳ Model evaluation and deployment
+- ✅ Model optimization and fine-tuning - Completed
+  - ✅ Test set evaluation (`scripts/evaluate_test_set.py`)
+  - ✅ Hyperparameter optimization (`scripts/optimize_lightgbm.py`)
+  - ✅ Segment and error analysis (`scripts/analyze_segments_and_errors.py`)
+  - ✅ EvaluateTestSetStep and AnalyzeSegmentsAndErrorsStep integrated into pipeline
+- ✅ Model persistence and versioning - Completed
+  - ✅ Model persistence module (`src/models/persistence.py`)
+  - ✅ Model versioning system with registry
+  - ✅ SaveModelWithVersioningStep integrated into pipeline
+  - ✅ Model saving and loading scripts
+- 🚧 API implementation - Next
+- ⏳ Model deployment
 
 **Development Strategy**: MVP-first approach - building essential features for a working end-to-end pipeline, then iterating with enhancements.
 

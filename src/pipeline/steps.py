@@ -6,6 +6,7 @@ Steps are organized by phase and can be added incrementally.
 """
 
 import pandas as pd
+import numpy as np
 import logging
 from typing import Dict, Any, List
 from pathlib import Path
@@ -632,5 +633,513 @@ class TrainAdvancedModelsStep(PipelineStep):
         context['advanced_trainer'] = trainer
         
         logger.info("Advanced models training completed!")
+        return context
+
+
+class EvaluateTestSetStep(PipelineStep):
+    """Step 8: Evaluate trained models on test set (Phase 6.3)."""
+    
+    def __init__(
+        self,
+        save_results: bool = True,
+        model_name: str = 'lightgbm'  # Evaluate best model by default
+    ):
+        super().__init__(name="evaluate_test_set", enabled=True)
+        self.save_results = save_results
+        self.model_name = model_name
+    
+    def get_dependencies(self) -> List[str]:
+        return ['train_advanced_models', 'feature_engineering']
+    
+    def validate(self, context: Dict[str, Any]) -> bool:
+        required_keys = ['X_test', 'y_test', 'advanced_models']
+        for key in required_keys:
+            if key not in context:
+                logger.error(f"Missing required key '{key}' in context. Run train_advanced_models step first.")
+                return False
+        
+        # Check if model exists
+        if self.model_name not in context['advanced_models']:
+            logger.warning(f"Model '{self.model_name}' not found. Available models: {list(context['advanced_models'].keys())}")
+            # Use first available model
+            self.model_name = list(context['advanced_models'].keys())[0]
+            logger.info(f"Using model '{self.model_name}' instead")
+        
+        return True
+    
+    def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        from src.models import ModelEvaluator, compare_models
+        import joblib
+        
+        X_test = context['X_test']
+        y_test = context['y_test']
+        models = context['advanced_models']
+        val_metrics = context.get('advanced_metrics', {})
+        
+        logger.info("=" * 80)
+        logger.info("Evaluating models on TEST SET")
+        logger.info("=" * 80)
+        logger.info(f"Test set size: {len(X_test):,} samples")
+        
+        test_results = {}
+        test_metrics = {}
+        
+        # Evaluate all models or just the specified one
+        models_to_evaluate = {self.model_name: models[self.model_name]} if self.model_name in models else models
+        
+        for model_name, model in models_to_evaluate.items():
+            logger.info(f"\nEvaluating {model_name.upper()}...")
+            
+            # Generate predictions
+            y_pred = model.predict(X_test)
+            
+            # Evaluate
+            evaluator = ModelEvaluator()
+            metrics = evaluator.evaluate(y_test, y_pred, store_residuals=True)
+            
+            test_results[model_name] = {
+                'metrics': metrics,
+                'evaluator': evaluator,
+                'predictions': y_pred
+            }
+            test_metrics[model_name] = metrics
+            
+            logger.info(f"  RMSE: {metrics['rmse']:.2f}")
+            logger.info(f"  MAE: {metrics['mae']:.2f}")
+            logger.info(f"  MAPE: {metrics['mape']:.2%}")
+            logger.info(f"  R²: {metrics['r2']:.4f}")
+        
+        # Create test comparison DataFrame
+        test_comparison_df = compare_models(test_metrics)
+        
+        # Compare validation vs test if validation metrics available
+        comparison_data = []
+        if val_metrics:
+            logger.info("\n" + "=" * 80)
+            logger.info("VALIDATION vs TEST COMPARISON")
+            logger.info("=" * 80)
+            
+            for model_name in test_metrics.keys():
+                if model_name in val_metrics:
+                    val = val_metrics[model_name]
+                    test = test_metrics[model_name]
+                    
+                    logger.info(f"\n{model_name.upper()}:")
+                    logger.info(f"  RMSE: Val={val['rmse']:.2f}, Test={test['rmse']:.2f}, "
+                               f"Diff={test['rmse'] - val['rmse']:.2f} "
+                               f"({((test['rmse'] - val['rmse']) / val['rmse']) * 100:.2f}%)")
+                    logger.info(f"  MAPE: Val={val['mape']:.2%}, Test={test['mape']:.2%}, "
+                               f"Diff={test['mape'] - val['mape']:.4f} "
+                               f"({((test['mape'] - val['mape']) / val['mape']) * 100:.2f}%)")
+                    logger.info(f"  R²:   Val={val['r2']:.4f}, Test={test['r2']:.4f}, "
+                               f"Diff={test['r2'] - val['r2']:.4f} "
+                               f"({((test['r2'] - val['r2']) / val['r2']) * 100:.2f}%)")
+                    
+                    comparison_data.append({
+                        'model': model_name,
+                        'metric': 'RMSE',
+                        'validation': val['rmse'],
+                        'test': test['rmse'],
+                        'difference': test['rmse'] - val['rmse'],
+                        'pct_change': ((test['rmse'] - val['rmse']) / val['rmse']) * 100
+                    })
+        
+        # Save results if requested
+        if self.save_results:
+            project_root = Path(__file__).parent.parent.parent
+            output_dir = project_root / "models" / "test_results"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Save test comparison
+            test_comparison_path = output_dir / "test_set_comparison.csv"
+            test_comparison_df.to_csv(test_comparison_path)
+            logger.info(f"\nSaved test comparison to {test_comparison_path}")
+            
+            # Save individual test reports and plots
+            for model_name, result in test_results.items():
+                evaluator = result['evaluator']
+                try:
+                    report = evaluator.get_summary_report()
+                    report_path = output_dir / f"{model_name}_test_report.csv"
+                    report.to_csv(report_path, index=False)
+                    
+                    residual_plot_path = output_dir / f"{model_name}_test_residuals.png"
+                    evaluator.plot_residuals(save_path=str(residual_plot_path))
+                    
+                    pred_plot_path = output_dir / f"{model_name}_test_predictions_vs_actuals.png"
+                    evaluator.plot_predictions_vs_actuals(save_path=str(pred_plot_path))
+                except Exception as e:
+                    logger.warning(f"Could not save plots for {model_name}: {e}")
+            
+            # Save validation vs test comparison
+            if comparison_data:
+                import pandas as pd
+                comparison_df = pd.DataFrame(comparison_data)
+                comparison_path = output_dir / "validation_vs_test_comparison.csv"
+                comparison_df.to_csv(comparison_path, index=False)
+                logger.info(f"Saved validation vs test comparison to {comparison_path}")
+        
+        # Store in context
+        context['test_metrics'] = test_metrics
+        context['test_results'] = test_results
+        context['test_comparison'] = test_comparison_df
+        
+        logger.info("\nTest set evaluation completed!")
+        return context
+
+
+class AnalyzeSegmentsAndErrorsStep(PipelineStep):
+    """Step 9: Analyze model performance by segments and errors (Phase 6.3)."""
+    
+    def __init__(
+        self,
+        save_results: bool = True,
+        model_name: str = 'lightgbm',
+        n_worst_predictions: int = 50
+    ):
+        super().__init__(name="analyze_segments_and_errors", enabled=True)
+        self.save_results = save_results
+        self.model_name = model_name
+        self.n_worst_predictions = n_worst_predictions
+    
+    def get_dependencies(self) -> List[str]:
+        return ['evaluate_test_set', 'feature_engineering']
+    
+    def validate(self, context: Dict[str, Any]) -> bool:
+        required_keys = ['X_test', 'y_test', 'test_data', 'advanced_models']
+        for key in required_keys:
+            if key not in context:
+                logger.error(f"Missing required key '{key}' in context.")
+                return False
+        
+        # Check if model exists
+        if self.model_name not in context['advanced_models']:
+            logger.warning(f"Model '{self.model_name}' not found. Available models: {list(context['advanced_models'].keys())}")
+            self.model_name = list(context['advanced_models'].keys())[0]
+            logger.info(f"Using model '{self.model_name}' instead")
+        
+        return True
+    
+    def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        import numpy as np
+        import pandas as pd
+        from src.models import ModelEvaluator
+        
+        X_test = context['X_test']
+        y_test = context['y_test']
+        test_df = context['test_data']
+        model = context['advanced_models'][self.model_name]
+        
+        logger.info("=" * 80)
+        logger.info("SEGMENT AND ERROR ANALYSIS")
+        logger.info("=" * 80)
+        
+        # Generate predictions
+        logger.info(f"Generating predictions using {self.model_name}...")
+        y_pred = model.predict(X_test)
+        
+        # Create segments
+        test_df_segmented = self._create_segments(test_df.copy())
+        
+        # Segment analysis
+        segment_results = self._analyze_by_segments(
+            test_df_segmented, y_test, y_pred
+        )
+        
+        # Error analysis
+        error_results = self._analyze_errors(
+            test_df_segmented, y_test, y_pred
+        )
+        
+        # Save results if requested
+        if self.save_results:
+            project_root = Path(__file__).parent.parent.parent
+            output_dir = project_root / "models" / "analysis_results"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Save segment analysis
+            segment_results_path = output_dir / "segment_analysis.csv"
+            segment_results.to_csv(segment_results_path, index=False)
+            logger.info(f"Saved segment analysis to {segment_results_path}")
+            
+            # Save error analysis
+            worst_path = output_dir / "worst_predictions.csv"
+            worst_predictions = error_results.nlargest(self.n_worst_predictions, 'absolute_error')
+            worst_predictions.to_csv(worst_path, index=False)
+            logger.info(f"Saved worst {self.n_worst_predictions} predictions to {worst_path}")
+        
+        # Store in context
+        context['segment_analysis'] = segment_results
+        context['error_analysis'] = error_results
+        
+        logger.info("\nSegment and error analysis completed!")
+        return context
+    
+    def _create_segments(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Create segment columns for analysis."""
+        # Price segments
+        df['price_segment'] = pd.cut(
+            df['price'],
+            bins=[0, 30000, 50000, 70000, 100000, 150000, 200000, float('inf')],
+            labels=['<30k', '30-50k', '50-70k', '70-100k', '100-150k', '150-200k', '>200k']
+        )
+        
+        # Age segments
+        if 'age_years' in df.columns:
+            df['age_segment'] = pd.cut(
+                df['age_years'],
+                bins=[0, 2, 5, 10, 15, float('inf')],
+                labels=['0-2', '3-5', '6-10', '11-15', '>15']
+            )
+        elif 'year' in df.columns:
+            current_year = 2024
+            df['age_years'] = current_year - df['year']
+            df['age_segment'] = pd.cut(
+                df['age_years'],
+                bins=[0, 2, 5, 10, 15, float('inf')],
+                labels=['0-2', '3-5', '6-10', '11-15', '>15']
+            )
+        
+        # Brand segments
+        if 'brand' in df.columns:
+            top_brands = df['brand'].value_counts().head(10).index.tolist()
+            df['brand_segment'] = df['brand'].apply(
+                lambda x: x if x in top_brands else 'Other'
+            )
+        
+        # Region segments
+        if 'state' in df.columns:
+            region_mapping = {
+                'AC': 'Norte', 'AP': 'Norte', 'AM': 'Norte', 'PA': 'Norte', 'RO': 'Norte', 'RR': 'Norte', 'TO': 'Norte',
+                'AL': 'Nordeste', 'BA': 'Nordeste', 'CE': 'Nordeste', 'MA': 'Nordeste', 'PB': 'Nordeste',
+                'PE': 'Nordeste', 'PI': 'Nordeste', 'RN': 'Nordeste', 'SE': 'Nordeste',
+                'ES': 'Sudeste', 'MG': 'Sudeste', 'RJ': 'Sudeste', 'SP': 'Sudeste',
+                'PR': 'Sul', 'RS': 'Sul', 'SC': 'Sul',
+                'DF': 'Centro-Oeste', 'GO': 'Centro-Oeste', 'MS': 'Centro-Oeste', 'MT': 'Centro-Oeste'
+            }
+            df['region'] = df['state'].map(region_mapping).fillna('Unknown')
+        
+        return df
+    
+    def _analyze_by_segments(
+        self,
+        test_df: pd.DataFrame,
+        y_test: pd.Series,
+        y_pred: np.ndarray
+    ) -> pd.DataFrame:
+        """Analyze model performance by different segments."""
+        from src.models import ModelEvaluator
+        
+        segment_results = []
+        
+        # Price segments
+        if 'price_segment' in test_df.columns:
+            for segment in test_df['price_segment'].cat.categories:
+                mask = test_df['price_segment'] == segment
+                if mask.sum() > 0:
+                    y_true_seg = y_test[mask]
+                    y_pred_seg = y_pred[mask]
+                    
+                    evaluator = ModelEvaluator()
+                    metrics = evaluator.evaluate(y_true_seg, y_pred_seg, store_residuals=False)
+                    
+                    segment_results.append({
+                        'segment_type': 'price',
+                        'segment_value': str(segment),
+                        'n_samples': mask.sum(),
+                        'rmse': metrics['rmse'],
+                        'mae': metrics['mae'],
+                        'mape': metrics['mape'],
+                        'r2': metrics['r2']
+                    })
+        
+        # Age segments
+        if 'age_segment' in test_df.columns:
+            for segment in test_df['age_segment'].cat.categories:
+                mask = test_df['age_segment'] == segment
+                if mask.sum() > 0:
+                    y_true_seg = y_test[mask]
+                    y_pred_seg = y_pred[mask]
+                    
+                    evaluator = ModelEvaluator()
+                    metrics = evaluator.evaluate(y_true_seg, y_pred_seg, store_residuals=False)
+                    
+                    segment_results.append({
+                        'segment_type': 'age',
+                        'segment_value': str(segment),
+                        'n_samples': mask.sum(),
+                        'rmse': metrics['rmse'],
+                        'mae': metrics['mae'],
+                        'mape': metrics['mape'],
+                        'r2': metrics['r2']
+                    })
+        
+        # Brand segments
+        if 'brand_segment' in test_df.columns:
+            for segment in test_df['brand_segment'].unique():
+                mask = test_df['brand_segment'] == segment
+                if mask.sum() > 0:
+                    y_true_seg = y_test[mask]
+                    y_pred_seg = y_pred[mask]
+                    
+                    evaluator = ModelEvaluator()
+                    metrics = evaluator.evaluate(y_true_seg, y_pred_seg, store_residuals=False)
+                    
+                    segment_results.append({
+                        'segment_type': 'brand',
+                        'segment_value': str(segment),
+                        'n_samples': mask.sum(),
+                        'rmse': metrics['rmse'],
+                        'mae': metrics['mae'],
+                        'mape': metrics['mape'],
+                        'r2': metrics['r2']
+                    })
+        
+        # Region segments
+        if 'region' in test_df.columns:
+            for segment in test_df['region'].unique():
+                mask = test_df['region'] == segment
+                if mask.sum() > 0:
+                    y_true_seg = y_test[mask]
+                    y_pred_seg = y_pred[mask]
+                    
+                    evaluator = ModelEvaluator()
+                    metrics = evaluator.evaluate(y_true_seg, y_pred_seg, store_residuals=False)
+                    
+                    segment_results.append({
+                        'segment_type': 'region',
+                        'segment_value': str(segment),
+                        'n_samples': mask.sum(),
+                        'rmse': metrics['rmse'],
+                        'mae': metrics['mae'],
+                        'mape': metrics['mape'],
+                        'r2': metrics['r2']
+                    })
+        
+        return pd.DataFrame(segment_results)
+    
+    def _analyze_errors(
+        self,
+        test_df: pd.DataFrame,
+        y_test: pd.Series,
+        y_pred: np.ndarray
+    ) -> pd.DataFrame:
+        """Analyze prediction errors."""
+        errors = y_test.values - y_pred
+        absolute_errors = np.abs(errors)
+        percentage_errors = (absolute_errors / y_test.values) * 100
+        
+        error_df = test_df.copy()
+        error_df['actual_price'] = y_test.values
+        error_df['predicted_price'] = y_pred
+        error_df['error'] = errors
+        error_df['absolute_error'] = absolute_errors
+        error_df['percentage_error'] = percentage_errors
+        
+        return error_df
+
+
+class SaveModelWithVersioningStep(PipelineStep):
+    """Step 10: Save best model with versioning and metadata (Phase 7)."""
+    
+    def __init__(
+        self,
+        model_name: str = 'lightgbm',
+        save_pipeline: bool = True
+    ):
+        super().__init__(name="save_model_with_versioning", enabled=True)
+        self.model_name = model_name
+        self.save_pipeline = save_pipeline
+    
+    def get_dependencies(self) -> List[str]:
+        return ['train_advanced_models', 'evaluate_test_set', 'feature_engineering']
+    
+    def validate(self, context: Dict[str, Any]) -> bool:
+        required_keys = ['advanced_models', 'advanced_metrics']
+        for key in required_keys:
+            if key not in context:
+                logger.error(f"Missing required key '{key}' in context.")
+                return False
+        
+        # Check if model exists
+        if self.model_name not in context['advanced_models']:
+            logger.warning(f"Model '{self.model_name}' not found. Available models: {list(context['advanced_models'].keys())}")
+            self.model_name = list(context['advanced_models'].keys())[0]
+            logger.info(f"Using model '{self.model_name}' instead")
+        
+        return True
+    
+    def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        from src.models import ModelPersistence
+        
+        model = context['advanced_models'][self.model_name]
+        metrics = context['advanced_metrics'][self.model_name]
+        
+        # Get test metrics if available
+        test_metrics = context.get('test_metrics', {}).get(self.model_name, metrics)
+        
+        # Use test metrics if available, otherwise use validation metrics
+        performance_metrics = {
+            'rmse': test_metrics.get('rmse', metrics['rmse']),
+            'mae': test_metrics.get('mae', metrics['mae']),
+            'mape': test_metrics.get('mape', metrics['mape']),
+            'r2': test_metrics.get('r2', metrics['r2'])
+        }
+        
+        logger.info("=" * 80)
+        logger.info("SAVING MODEL WITH VERSIONING")
+        logger.info("=" * 80)
+        logger.info(f"Model: {self.model_name}")
+        logger.info(f"Performance metrics: {performance_metrics}")
+        
+        # Extract hyperparameters
+        hyperparameters = {}
+        if hasattr(model, 'get_params'):
+            hyperparameters = model.get_params()
+        
+        # Get feature list from feature pipeline
+        feature_list = []
+        feature_pipeline = None
+        
+        if 'artifacts' in context and 'feature_pipeline' in context['artifacts']:
+            feature_pipeline = context['artifacts']['feature_pipeline']
+            if hasattr(feature_pipeline, 'get_feature_names'):
+                feature_list = feature_pipeline.get_feature_names()
+        
+        # Get training info
+        training_info = {
+            'train_size': len(context.get('X_train', [])),
+            'val_size': len(context.get('X_val', [])),
+            'test_size': len(context.get('X_test', [])),
+            'n_features': len(feature_list) if feature_list else 0
+        }
+        
+        # Initialize persistence manager
+        project_root = Path(__file__).parent.parent.parent
+        persistence = ModelPersistence(models_dir=project_root / "models")
+        
+        # Save model
+        model_dir, metadata = persistence.save_model(
+            model=model,
+            model_name=self.model_name,
+            model_type=self.model_name,
+            performance_metrics=performance_metrics,
+            feature_list=feature_list,
+            hyperparameters=hyperparameters,
+            feature_pipeline=feature_pipeline if self.save_pipeline else None,
+            training_info=training_info
+        )
+        
+        logger.info(f"\nModel saved successfully!")
+        logger.info(f"  Directory: {model_dir}")
+        logger.info(f"  Version: {metadata.version}")
+        logger.info(f"  Training date: {metadata.training_date}")
+        
+        # Store in context
+        context['saved_model_dir'] = model_dir
+        context['saved_model_metadata'] = metadata
+        context['model_persistence'] = persistence
+        
+        logger.info("\nModel versioning completed!")
         return context
 

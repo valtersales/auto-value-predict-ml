@@ -74,10 +74,22 @@ context = {
     'train_data': DataFrame,        # Dados de treino (após split)
     'val_data': DataFrame,         # Dados de validação
     'test_data': DataFrame,         # Dados de teste
+    'X_train': DataFrame,           # Features de treino (após feature engineering)
+    'y_train': Series,              # Target de treino
+    'X_val': DataFrame,             # Features de validação
+    'y_val': Series,                # Target de validação
+    'X_test': DataFrame,            # Features de teste
+    'y_test': Series,               # Target de teste
+    'baseline_models': dict,        # Modelos baseline treinados
+    'advanced_models': dict,        # Modelos avançados treinados
+    'test_metrics': dict,           # Métricas no test set
+    'segment_analysis': DataFrame,  # Análise por segmentos
+    'error_analysis': DataFrame,    # Análise de erros
     'config': {},                   # Configurações
     'artifacts': {                  # Artefatos (modelos, validadores, etc.)
         'cleaner': DataCleaner,
         'splitter': DataSplitter,
+        'feature_pipeline': FeaturePipeline,
         'split_files': {...}
     },
     'metadata': {                   # Metadados do pipeline
@@ -97,11 +109,26 @@ context = {
 - ✅ `CleanDataStep`: Limpa e preprocessa dados
 - ✅ `SplitDataStep`: Divide dados em train/val/test
 
-### Phase 3+: Placeholders
+### Phase 3: Feature Engineering
 
-- ⏳ `FeatureEngineeringStep`: Engenharia de features (a implementar)
-- ⏳ `TrainBaselineModelsStep`: Treina modelos baseline (a implementar)
-- ⏳ `TrainAdvancedModelsStep`: Treina modelos avançados (a implementar)
+- ✅ `FeatureEngineeringStep`: Engenharia de features
+
+### Phase 4: Baseline Models
+
+- ✅ `TrainBaselineModelsStep`: Treina modelos baseline
+
+### Phase 5: Advanced Models
+
+- ✅ `TrainAdvancedModelsStep`: Treina modelos avançados (Random Forest, XGBoost, LightGBM)
+
+### Phase 6: Model Optimization & Validation
+
+- ✅ `EvaluateTestSetStep`: Avalia modelos no test set e compara com validation set
+- ✅ `AnalyzeSegmentsAndErrorsStep`: Análise de performance por segmentos e análise de erros
+
+### Phase 7: Model Persistence & Versioning
+
+- ✅ `SaveModelWithVersioningStep`: Salva melhor modelo com versionamento e metadata
 
 ## Adicionando Novas Etapas
 

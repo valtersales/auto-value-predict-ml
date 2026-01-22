@@ -16,6 +16,11 @@ from .evaluator import (
 )
 
 from .trainer import AdvancedModelTrainer
+from .persistence import (
+    ModelPersistence,
+    ModelMetadata,
+    validate_model
+)
 
 __all__ = [
     'MeanBaseline',
@@ -23,6 +28,9 @@ __all__ = [
     'BaselineModelTrainer',
     'ModelEvaluator',
     'compare_models',
-    'AdvancedModelTrainer'
+    'AdvancedModelTrainer',
+    'ModelPersistence',
+    'ModelMetadata',
+    'validate_model'
 ]
 

@@ -37,7 +37,10 @@ from src.pipeline.steps import (
     SplitDataStep,
     FeatureEngineeringStep,
     TrainBaselineModelsStep,
-    TrainAdvancedModelsStep
+    TrainAdvancedModelsStep,
+    EvaluateTestSetStep,
+    AnalyzeSegmentsAndErrorsStep,
+    SaveModelWithVersioningStep
 )
 
 # Configure logging
@@ -101,6 +104,23 @@ def create_pipeline() -> MLPipeline:
         save_results=True,
         save_models=True,
         include_lightgbm=True
+    ))
+    
+    # Phase 6: Model Optimization & Validation
+    pipeline.add_step(EvaluateTestSetStep(
+        save_results=True,
+        model_name='lightgbm'  # Evaluate best model
+    ))
+    pipeline.add_step(AnalyzeSegmentsAndErrorsStep(
+        save_results=True,
+        model_name='lightgbm',
+        n_worst_predictions=50
+    ))
+    
+    # Phase 7: Model Persistence & Versioning
+    pipeline.add_step(SaveModelWithVersioningStep(
+        model_name='lightgbm',
+        save_pipeline=True
     ))
     
     return pipeline
