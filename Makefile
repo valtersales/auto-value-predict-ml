@@ -190,7 +190,7 @@ test: ## Run all tests
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/ -v
+	docker-compose exec api python -m pytest tests/ -v
 
 test-unit: ## Run unit tests only
 	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
@@ -198,7 +198,7 @@ test-unit: ## Run unit tests only
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/ -v -k "test_"
+	docker-compose exec api python -m pytest tests/ -v -k "test_"
 
 test-cleaner: ## Run tests for data cleaner module
 	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
@@ -206,7 +206,7 @@ test-cleaner: ## Run tests for data cleaner module
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/test_cleaner.py -v
+	docker-compose exec api python -m pytest tests/test_cleaner.py -v
 
 test-validator: ## Run tests for data validator module
 	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
@@ -214,7 +214,7 @@ test-validator: ## Run tests for data validator module
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/test_validator.py -v
+	docker-compose exec api python -m pytest tests/test_validator.py -v
 
 test-splitter: ## Run tests for data splitter module
 	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
@@ -222,7 +222,7 @@ test-splitter: ## Run tests for data splitter module
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/test_splitter.py -v
+	docker-compose exec api python -m pytest tests/test_splitter.py -v
 
 test-pipeline: ## Run tests for pipeline module
 	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
@@ -230,5 +230,34 @@ test-pipeline: ## Run tests for pipeline module
 		echo "Please start containers first: make up"; \
 		exit 1; \
 	fi
-	docker-compose exec api pytest tests/test_pipeline.py -v || echo "Pipeline tests not yet implemented"
+	docker-compose exec api python -m pytest tests/test_pipeline.py -v || echo "Pipeline tests not yet implemented"
+
+test-api: ## Run tests for API module
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Error: Docker container 'api' is not running."; \
+		echo "Please start containers first: make up"; \
+		exit 1; \
+	fi
+	docker-compose exec api python -m pytest tests/test_api.py -v
+
+# API commands
+# API runs automatically when containers start (see docker-compose.yml)
+# Access API docs at: http://localhost:8000/docs
+
+api-start: ## Start API server (runs automatically with make up)
+	@echo "API is configured to start automatically with 'make up'"
+	@echo "Access API at: http://localhost:8000"
+	@echo "API docs at: http://localhost:8000/docs"
+	@if ! docker-compose ps api 2>/dev/null | grep -q "Up"; then \
+		echo "Starting containers..."; \
+		make up; \
+	else \
+		echo "Containers are already running."; \
+	fi
+
+api-logs: ## Show API logs
+	docker-compose logs -f api
+
+api-health: ## Check API health endpoint
+	@curl -s http://localhost:8000/health | python -m json.tool || echo "API is not running or not accessible"
 

@@ -102,6 +102,13 @@ Run `make help` to see all available commands:
 - `make logs-jupyter` - Show Jupyter container logs
 - `make stop-jupyter` - Stop Jupyter container
 
+**API:**
+
+- `make api-start` - Start API server (runs automatically with `make up`)
+- `make api-logs` - Show API logs
+- `make api-health` - Check API health endpoint
+- `make test-api` - Run API tests
+
 **Cleanup:**
 
 - `make clean` - Stop and remove containers, networks
@@ -237,8 +244,16 @@ The enriched datasets include the following columns:
   - ✅ Model versioning system with registry
   - ✅ SaveModelWithVersioningStep integrated into pipeline
   - ✅ Model saving and loading scripts
-- 🚧 API implementation - Next
-- ⏳ Model deployment
+- ✅ API development - Completed
+  - ✅ FastAPI application (`src/api/main.py`)
+  - ✅ Prediction endpoints (`POST /predict`, `POST /predict/batch`)
+  - ✅ API documentation (OpenAPI/Swagger at `/docs`)
+  - ✅ Request/Response schemas (`src/api/schemas.py`)
+  - ✅ Prediction logic (`src/api/predictor.py`)
+  - ✅ Error handling (`src/api/errors.py`)
+  - ✅ API tests (`tests/test_api.py`)
+  - ✅ Makefile commands for API management
+- ⏳ Docker optimization and deployment documentation
 
 **Development Strategy**: MVP-first approach - building essential features for a working end-to-end pipeline, then iterating with enhancements.
 
@@ -290,6 +305,7 @@ make test
 make test-cleaner
 make test-validator
 make test-splitter
+make test-api
 ```
 
 **Via scripts Python diretamente:**
@@ -336,6 +352,142 @@ Cada etapa:
 - Salva estado para permitir retomar execução
 
 Para mais detalhes, veja [src/pipeline/README.md](src/pipeline/README.md).
+
+## API Usage
+
+The project includes a REST API built with FastAPI for serving predictions. The API automatically starts when you run `make up`.
+
+### Accessing the API
+
+- **API Base URL**: http://localhost:8000
+- **Interactive API Documentation (Swagger)**: http://localhost:8000/docs
+- **Alternative API Documentation (ReDoc)**: http://localhost:8000/redoc
+
+### API Endpoints
+
+#### Health Check
+```bash
+GET /health
+```
+Returns the health status of the API and loaded model.
+
+#### Model Information
+```bash
+GET /model/info
+```
+Returns information about the loaded model including performance metrics and hyperparameters.
+
+#### Single Prediction
+```bash
+POST /predict
+Content-Type: application/json
+
+{
+  "brand": "Fiat",
+  "model": "Uno",
+  "year": 2020,
+  "km": 50000.0,
+  "state": "SP",
+  "city": "São Paulo",
+  "fuel_type": "Flex",
+  "transmission": "Manual",
+  "engine_size": 1.0,
+  "color": "Branco",
+  "doors": 4,
+  "condition": "Bom",
+  "age_years": 4
+}
+```
+
+#### Batch Prediction
+```bash
+POST /predict/batch
+Content-Type: application/json
+
+{
+  "cars": [
+    {
+      "brand": "Fiat",
+      "model": "Uno",
+      "year": 2020,
+      "km": 50000.0,
+      "state": "SP",
+      "city": "São Paulo",
+      "fuel_type": "Flex",
+      "transmission": "Manual",
+      "engine_size": 1.0,
+      "color": "Branco",
+      "doors": 4,
+      "condition": "Bom",
+      "age_years": 4
+    },
+    {
+      "brand": "Volkswagen",
+      "model": "Gol",
+      "year": 2019,
+      "km": 60000.0,
+      "state": "RJ",
+      "city": "Rio de Janeiro",
+      "fuel_type": "Flex",
+      "transmission": "Manual",
+      "engine_size": 1.6,
+      "color": "Prata",
+      "doors": 4,
+      "condition": "Ótimo",
+      "age_years": 5
+    }
+  ]
+}
+```
+
+### Example Usage with cURL
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Single prediction
+curl -X POST "http://localhost:8000/predict" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "brand": "Fiat",
+    "model": "Uno",
+    "year": 2020,
+    "km": 50000.0,
+    "state": "SP",
+    "city": "São Paulo",
+    "fuel_type": "Flex",
+    "transmission": "Manual",
+    "engine_size": 1.0,
+    "color": "Branco",
+    "doors": 4,
+    "condition": "Bom",
+    "age_years": 4
+  }'
+
+# Model information
+curl http://localhost:8000/model/info
+```
+
+### API Testing
+
+Run API tests:
+```bash
+make test-api
+```
+
+### Input Validation
+
+The API validates all inputs using Pydantic models. Valid values include:
+
+- **fuel_type**: `Flex`, `Gasolina`, `Diesel`, `Elétrico`, `Híbrido`, `GNV`
+- **transmission**: `Manual`, `Automático`, `Automatizado`, `CVT`
+- **condition**: `Regular`, `Bom`, `Ótimo`, `Excelente`
+- **state**: Brazilian state codes (e.g., `SP`, `RJ`, `MG`)
+- **doors**: `2`, `3`, `4`, `5`
+- **year**: `1985` to `2023`
+- **km**: `0` to `500000`
+- **engine_size**: `0.7` to `7.0` liters
 
 ## License
 
