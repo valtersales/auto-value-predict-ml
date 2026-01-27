@@ -266,41 +266,41 @@ See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed roadmap and ta
 
 ## ML Pipeline System
 
-O projeto utiliza um sistema modular de pipeline que permite executar todas as etapas de forma orquestrada e incremental. O pipeline é expandido conforme novas fases são implementadas.
+The project uses a modular pipeline system that allows executing all steps in an orchestrated and incremental manner. The pipeline expands as new phases are implemented.
 
-### Executar Pipeline
+### Running the Pipeline
 
-**Via Makefile (recomendado - executa no Docker):**
+**Via Makefile (recommended - runs in Docker):**
 
 ```bash
-# Iniciar containers Docker primeiro
+# Start Docker containers first
 make up
 
-# Executar pipeline completo (até fases implementadas)
+# Run complete pipeline (up to implemented phases)
 make pipeline
 
-# Listar etapas disponíveis
+# List available steps
 make pipeline-list
 
-# Ver status do pipeline
+# Check pipeline status
 make pipeline-status
 
-# Executar apenas Phase 2 (preprocessing)
+# Run only Phase 2 (preprocessing)
 make pipeline-phase2
 
-# Executar etapa específica
+# Run specific step
 make pipeline-step STEP=clean_data
 
-# Executar a partir de uma etapa
+# Run from a specific step
 make pipeline-from STEP=split_data
 
-# Treinar modelos baseline (standalone)
+# Train baseline models (standalone)
 make train-baseline
 
-# Treinar modelos avançados (standalone)
+# Train advanced models (standalone)
 make train-advanced
 
-# Executar testes
+# Run tests
 make test
 make test-cleaner
 make test-validator
@@ -308,50 +308,50 @@ make test-splitter
 make test-api
 ```
 
-**Via scripts Python diretamente:**
+**Via Python scripts directly:**
 
 ```bash
-# Executar pipeline completo (até fases implementadas)
+# Run complete pipeline (up to implemented phases)
 python scripts/run_pipeline.py
 
-# Listar etapas disponíveis
+# List available steps
 python scripts/run_pipeline.py --list-steps
 
-# Ver status do pipeline
+# Check pipeline status
 python scripts/run_pipeline.py --status
 
-# Executar apenas Phase 2 (preprocessing)
+# Run only Phase 2 (preprocessing)
 python scripts/preprocess_data.py
 
-# Executar etapas específicas
+# Run specific steps
 python scripts/run_pipeline.py --start-from clean_data --stop-at split_data
 
-# Treinar modelos baseline (standalone)
+# Train baseline models (standalone)
 python scripts/train_baseline_models.py
 
-# Treinar modelos avançados (standalone)
+# Train advanced models (standalone)
 python scripts/train_advanced_models.py
 ```
 
-### Estrutura do Pipeline
+### Pipeline Structure
 
-O pipeline é composto por etapas (`PipelineStep`) que são executadas sequencialmente:
+The pipeline is composed of steps (`PipelineStep`) that are executed sequentially:
 
-1. **LoadDataStep**: Carrega datasets enriquecidos
-2. **ValidateDataStep**: Valida qualidade dos dados
-3. **CleanDataStep**: Limpa e preprocessa dados
-4. **SplitDataStep**: Divide dados em train/val/test
-5. **FeatureEngineeringStep**: Engenharia de features (Phase 3)
-6. **TrainBaselineModelsStep**: Treina modelos baseline (Phase 4)
-7. **TrainAdvancedModelsStep**: Treina modelos avançados (Phase 5) ✅
+1. **LoadDataStep**: Loads enriched datasets
+2. **ValidateDataStep**: Validates data quality
+3. **CleanDataStep**: Cleans and preprocesses data
+4. **SplitDataStep**: Splits data into train/val/test
+5. **FeatureEngineeringStep**: Feature engineering (Phase 3)
+6. **TrainBaselineModelsStep**: Trains baseline models (Phase 4)
+7. **TrainAdvancedModelsStep**: Trains advanced models (Phase 5) ✅
 
-Cada etapa:
-- Valida seus pré-requisitos
-- Executa sua lógica
-- Atualiza o contexto compartilhado
-- Salva estado para permitir retomar execução
+Each step:
+- Validates its prerequisites
+- Executes its logic
+- Updates the shared context
+- Saves state to allow resuming execution
 
-Para mais detalhes, veja [src/pipeline/README.md](src/pipeline/README.md).
+For more details, see [src/pipeline/README.md](src/pipeline/README.md).
 
 ## API Usage
 
